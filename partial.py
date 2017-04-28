@@ -1,153 +1,141 @@
-# from underscore import _
-
-
-
-# <Partial.py>
+# partial.py
 import types
 
-
-identity = idtt = lambda val: val
-
-
-always = const = lambda val: lambda: val
-
-
-def is_func(val):
-    return isinstance(val, types.FunctionType)
-
-
-def is_dict(val):
-    return type(val) is dict
-
-
-def is_mr(val):
-    return is_dict(val) and val.get('_mr')
-
-
-def mr(*args):
-    return {'value': args, '_mr': True}
-
-
-def go(seed, *funcs):
-    seed = seed() if is_func(seed) else seed
-    for func in funcs:
-        seed = func(*seed.get('value')) if is_mr(seed) else func(seed)
-    return seed
-
-
-def pipe(*funcs):
-    return lambda *seed: go(seed[0] if len(seed) == 1 else mr(*seed), *funcs)
-
-
-# def pipe(*funcs):
-#     def _pipe(*seed):
-#         _seed = seed[0] if len(seed) == 1 else mr(*seed)
-#         return go(_seed, *funcs)
-#     return _pipe
-
-
-def partial(func, *parts):
-    parts1, parts2, ___idx = ([], [], len(parts))
-
-    for i in range(___idx):
-        if parts[i] == ___:
-            ___idx = i
-        elif i < ___idx:
-            parts1.append(parts[i])
-        else:
-            parts2.append(parts[i])
-
-    def _partial(*args):
-        args1, args2, rest = (parts1[:], parts2[:], list(args))
-
-        for j in range(len(args1)):
-            if args1[j] == _:
-                args1[j] = rest.pop(0)
-
-        for j in range(len(args2)):
-            if args2[j] == _:
-                args2[j] = rest.pop()
-
-        return func(*args1, *rest, *args2)
-
-    return _partial
-
-_ = partial
 ___ = {}
 
 
+class Partial(object):
+    def __init__(self):
+        self.VERSION = "0.0.1"
 
-# <TEST>
+    identity = idtt = lambda self, val: val
 
-def _sum(*args):
-    args = args[0] if len(args) == 1 else args
-    sum = 0
-    for i in args:
-        sum = sum + i
-    return sum
+    always = const = lambda self, val: lambda *args: val
 
+    def is_func(self, val):
+        return isinstance(val, types.FunctionType) or callable(val)
+    isFunction = is_function = is_func
 
-def sum10(n):
-    return _sum(n, 10)
+    def is_dict(self, val):
+        return type(val) is dict
+    isDictionary = is_dictionary = is_dict
 
+    def is_none(self, val):
+        return val is None
 
-# res = go(mr(3, 4, 5), _sum, sum10)
-# print(res)
+    def is_mr(self, val):
+        return self.is_dict(val) and val.get('_mr')
 
-# pp = pipe(_sum, sum10)
-# print(pp(range(1, 11)))
+    def mr(*args):
+        return {'value': args, '_mr': True}
 
+    def go(self, seed, *funcs):
+        seed = seed() if self.is_func(seed) else seed
+        for func in funcs:
+            seed = func(*seed.get('value')) if self.is_mr(seed) else func(seed)
+        return seed
 
-part1 = partial(print, _, 0, ___, 0, _, 0)
-# part2 = partial(print, 10, 20)
+    def pipe(self, *funcs):
+        return lambda *seed: self.go(seed[0] if len(seed) == 1 else self.mr(*seed), *funcs)
 
-part1(111, 222, 333, 444)
-# part2(30)
+    def partial(self, func, *parts):
+        parts1, parts2, ___idx = ([], [], len(parts))
 
+        for i in range(___idx):
+            if parts[i] == ___:
+                ___idx = i
+            elif i < ___idx:
+                parts1.append(parts[i])
+            else:
+                parts2.append(parts[i])
 
-print(always(111)())
+        def _partial(*args):
+            args1, args2, rest = (parts1[:], parts2[:], list(args))
 
-# arr = 1,2,3,4
-# dic = {'value': arr, '_mr': True}
-# dic2 = {'value': arr}
-#
-# print(is_mr(dic2))
-#
-# print(is_mr(dic), is_mr(dic2))
+            for j in range(len(args1)):
+                if args1[j] == _:
+                    args1[j] = rest.pop(0)
 
-# print(type(dic) is dict)
+            for j in range(len(args2)):
+                if args2[j] == _:
+                    args2[j] = rest.pop()
 
-# # while문 테스트
-# prompt = """
-#     1. Add
-#     2. Del
-#     3. List
-#     4. Quit
-#
-#     Enter number: """
-#
-# number = 0
-#
-# while number != 4:
-#     print(prompt)
-#     number = int(input())
+            merged = args1 + rest + args2
 
+            return func(*merged)
 
-# # 커피자판기
-# coffee = 10
-# money = 300
-# while money:
-#     print("몇 잔의 커피를 원하시나요?")
-#     order = int(input())
-#     if order < coffee and coffee > 0:
-#         coffee = coffee - order
-#         print("여기 %d잔의 커피를 드립니다." % order)
-#         print("남은 커피의 양은 %d잔 입니다." % coffee)
-#     else:
-#         print("남은 커피가 %d잔뿐입니다. 남은 커피를 모두 드립니다." % coffee)
-#         print("이제 커피가 다 떨어졌습니다. 판매를 종료합니다.")
-#         break
+        return _partial
 
+    def each(self, data, iteratee):
+        if type(data) is not dict:
+            for i in range(len(data)):
+                iteratee(data[i], i, data)
+        else:
+            for k in data.keys():
+                iteratee(data[k], k, data)
 
-# result = [x*y for x in range(2, 10) for y in range(1, 10)]
-# print(result)
+    def map(self, data, iteratee):
+        result = []
+        if type(data) is not dict:
+            for i in range(len(data)):
+                result.append(iteratee(data[i], i, data))
+        else:
+            for k in data.keys():
+                result.append(iteratee(data[k], k, data))
+        return result
+
+    def reduce(self, data, iteratee, memo=None):
+        if type(data) is not dict:
+            memo = memo if memo is None else data.pop(0)
+            for i in range(len(data)):
+                memo = iteratee(memo, data[i], i, data)
+        else:
+            keys = data.keys()
+            if memo is None:
+                keys = list(keys)
+                memo = data[keys.pop(0)]
+            for k in keys:
+                memo = iteratee(memo, data[k], k, data)
+        return memo
+
+    def reduce_right(self, data, iteratee, memo=None):
+        if type(data) is not dict:
+            memo = memo if memo is None else data.pop()
+            for i in range(len(data)-1, -1, -1):
+                memo = iteratee(memo, data[i], i, data)
+        else:
+            keys = list(data.keys())
+            keys.reverse()
+            if memo is None:
+                memo = data[keys.pop(0)]
+            for k in keys:
+                memo = iteratee(memo, data[k], k, data)
+        return memo
+    reduceRight = reduce_right
+
+    def find(self, data, predicate):
+        if type(data) is not dict:
+            for i in range(len(data)):
+                if predicate(data[i], i, data):
+                    return data[i]
+        else:
+            for k in data.keys():
+                if predicate(data[k], k, data):
+                    return data[k]
+        return None
+
+    def find_i(self, data, predicate):
+        if type(data) is not dict:
+            for i in range(len(data)):
+                if predicate(data[i], i, data):
+                    return i
+        else:
+            for k in data.keys():
+                if predicate(data[k], k, data):
+                    return k
+        return -1
+    findIndex = find_index = find_i
+
+_ = Partial()
+
+# print("import partial", _.VERSION)
