@@ -124,14 +124,23 @@ class Partial(object):
                     return data[k]
         return None
 
-    def find_i(self, data, predicate):
-        if type(data) is dict:
+    def find_i(self, list, predicate):
+        if type(list) is dict:
             return -1
-        for i in range(len(data)):
-            if predicate(data[i], i, data):
+        for i in range(len(list)):
+            if predicate(list[i], i, list):
                 return i
         return -1
     findIndex = find_index = find_i
+
+    def find_k(self, dict, predicate):
+        if type(list) is not dict:
+            return None
+        for k in dict.keys():
+            if predicate(dict[k], k, dict):
+                return k
+        return None
+    findKey = find_key = find_k
 
 _ = Partial()
 
