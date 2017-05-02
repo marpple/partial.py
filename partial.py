@@ -170,7 +170,7 @@ class Partial(object):
         if iteratee is None and self.is_func(data):
             return self.partial(self.reject, _, data)
 
-        return self.filter(data, lambda *args: not iteratee(*args))
+        return self.filter(data, self.negate(iteratee))
 
     def negate(self, predicate):
         return lambda *args: not predicate(*args)
