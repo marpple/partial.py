@@ -143,6 +143,18 @@ class Partial(object):
         return None
     findKey = find_key = find_k
 
+    def filter(self, data, iteratee):
+        result = []
+        if type(data) is not dict:
+            for i in range(len(data)):
+                if iteratee(data[i], i, data):
+                    result.append(data[i])
+        else:
+            for k in data.keys():
+                if iteratee(data[k], k, data):
+                    result.append(data[k])
+        return result
+
 _ = Partial()
 __ = _.pipe
 
