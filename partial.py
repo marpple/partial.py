@@ -152,8 +152,9 @@ class Partial(object):
     def pluck(self, data, key):
         return self.map(data, lambda v, *rest: v[key])
 
-
-    def filter(self, data, iteratee):
+    def filter(self, data, iteratee=None):
+        if iteratee is None and self.is_func(data):
+            return self.partial(self.filter, _, data)
         result = []
         if type(data) is not dict:
             for i in range(len(data)):
@@ -165,6 +166,26 @@ class Partial(object):
                     result.append(data[k])
         return result
 
+    def reject(self, data, iteratee=None):
+        if iteratee is None and self.is_func(data):
+            return self.partial(self.reject, _, data)
+        result = []
+        if type(data) is not dict:
+            for i in range(len(data)):
+                if not iteratee(data[i], i, data):
+                    result.append(data[i])
+        else:
+            for k in data.keys():
+                if not iteratee(data[k], k, data):
+                    result.append(data[k])
+        return result
+
+    # def negate(self, predicate):
+    #     return lambda *args:
+
+# _.negate = function (predicate) {
+#     return function () { return !predicate.apply(this, arguments); };
+#   };
 _ = Partial()
 __ = _.pipe
 
