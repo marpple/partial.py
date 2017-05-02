@@ -26,13 +26,14 @@ class Partial(object):
     def is_mr(self, val):
         return self.is_dict(val) and val.get('_mr')
 
-    def mr(*args):
+    def mr(self, *args):
         return {'value': args, '_mr': True}
 
     def go(self, seed, *funcs):
         seed = seed() if self.is_func(seed) else seed
         for func in funcs:
             seed = func(*seed.get('value')) if self.is_mr(seed) else func(seed)
+            # seed = func(seed) if not self.is_mr(seed) func(*seed.get('value'))
         return seed
 
     def pipe(self, *funcs):
@@ -143,5 +144,7 @@ class Partial(object):
     findKey = find_key = find_k
 
 _ = Partial()
+__ = _.pipe
+
 
 # print("import partial", _.VERSION)
