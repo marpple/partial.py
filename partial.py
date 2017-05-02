@@ -75,7 +75,9 @@ class Partial(object):
             for k in data.keys():
                 iteratee(data[k], k, data)
 
-    def map(self, data, iteratee):
+    def map(self, data, iteratee=None):
+        if iteratee is None and self.is_func(data):
+            return self.partial(self.map, _, data)
         result = []
         if type(data) is not dict:
             for i in range(len(data)):
@@ -85,9 +87,11 @@ class Partial(object):
                 result.append(iteratee(data[k], k, data))
         return result
 
-    def reduce(self, data, iteratee, memo=None):
+    def reduce(self, data, iteratee=None, memo=None):
+        if self.is_func(data):
+            return self.partial(self.reduce, _, data, iteratee)
         if type(data) is not dict:
-            memo = memo if memo is None else data.pop(0)
+            memo = memo if memo else data.pop(0)
             for i in range(len(data)):
                 memo = iteratee(memo, data[i], i, data)
         else:
@@ -99,9 +103,11 @@ class Partial(object):
                 memo = iteratee(memo, data[k], k, data)
         return memo
 
-    def reduce_right(self, data, iteratee, memo=None):
+    def reduce_right(self, data, iteratee=None, memo=None):
+        if self.is_func(data):
+            return self.partial(self.reduce_right, _, data, iteratee)
         if type(data) is not dict:
-            memo = memo if memo is None else data.pop()
+            memo = memo if memo else data.pop()
             for i in range(len(data)-1, -1, -1):
                 memo = iteratee(memo, data[i], i, data)
         else:
@@ -142,6 +148,10 @@ class Partial(object):
                 return k
         return None
     findKey = find_key = find_k
+
+    def pluck(self, data, key):
+        return self.map(data, lambda v, *rest: v[key])
+
 
     def filter(self, data, iteratee):
         result = []
