@@ -169,19 +169,11 @@ class Partial(object):
     def reject(self, data, iteratee=None):
         if iteratee is None and self.is_func(data):
             return self.partial(self.reject, _, data)
-        result = []
-        if type(data) is not dict:
-            for i in range(len(data)):
-                if not iteratee(data[i], i, data):
-                    result.append(data[i])
-        else:
-            for k in data.keys():
-                if not iteratee(data[k], k, data):
-                    result.append(data[k])
-        return result
 
-    # def negate(self, predicate):
-    #     return lambda *args:
+        return self.filter(data, lambda *args: not iteratee(*args))
+
+    def negate(self, predicate):
+        return lambda *args: not predicate(*args)
 
 # _.negate = function (predicate) {
 #     return function () { return !predicate.apply(this, arguments); };
