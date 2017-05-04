@@ -22,6 +22,7 @@ class Partial(object):
 
     def is_none(self, val):
         return val is None
+    isNone = is_none
 
     def is_mr(self, val):
         return self.is_dict(val) and val.get('_mr')
@@ -127,7 +128,9 @@ class Partial(object):
         return memo
     reduceRight = reduce_right
 
-    def find(self, data, predicate):
+    def find(self, data, predicate=None):
+        if predicate is None and self.is_func(data):
+            return self.partial(self.find, _, data)
         if type(data) is not dict:
             for i in range(len(data)):
                 if predicate(data[i], i, data):
@@ -138,7 +141,9 @@ class Partial(object):
                     return data[k]
         return None
 
-    def find_i(self, list, predicate):
+    def find_i(self, list, predicate=None):
+        if predicate is None and self.is_func(list):
+            return self.partial(self.find_i, _, list)
         if type(list) is dict:
             return -1
         for i in range(len(list)):
@@ -148,6 +153,8 @@ class Partial(object):
     findIndex = find_index = find_i
 
     def find_k(self, dict, predicate):
+        if predicate is None and self.is_func(dict):
+            return self.partial(self.find_k, _, dict)
         if type(list) is not dict:
             return None
         for k in dict.keys():
@@ -156,7 +163,9 @@ class Partial(object):
         return None
     findKey = find_key = find_k
 
-    def pluck(self, data, key):
+    def pluck(self, data, key=None):
+        if key is None:
+            return self.partial(self.pluck, _, data)
         return self.map(data, lambda v, *rest: v[key])
 
     def filter(self, data, iteratee=None):
