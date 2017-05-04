@@ -67,6 +67,13 @@ class Partial(object):
 
         return _partial
 
+    def range(self, start, stop=None, step=None):
+        if stop is None:
+            return list(range(start))
+        if step is None:
+            return list(range(start, stop))
+        return list(range(start, stop, step))
+
     def each(self, data, iteratee):
         if type(data) is not dict:
             for i in range(len(data)):
@@ -151,7 +158,6 @@ class Partial(object):
 
     def pluck(self, data, key):
         return self.map(data, lambda v, *rest: v[key])
-
 
     def filter(self, data, iteratee):
         result = []
