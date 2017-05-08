@@ -8,9 +8,9 @@ class Partial(object):
     def __init__(self):
         self.VERSION = "0.0.1"
 
-    identity = idtt = lambda self, val: val
+    identity = idtt = lambda self, val, *rest: val
 
-    always = const = lambda self, val: lambda *args: val
+    always = const = lambda self, val, *rest: lambda *args: val
 
     def is_func(self, val):
         return isinstance(val, types.FunctionType) or callable(val)
@@ -22,6 +22,7 @@ class Partial(object):
 
     def is_none(self, val):
         return val is None
+    isNone = is_none
 
     def is_mr(self, val):
         return self.is_dict(val) and val.get('_mr')
@@ -85,7 +86,6 @@ class Partial(object):
     def map(self, data, iteratee=None):
         if iteratee is None and self.is_func(data):
             return self.partial(self.map, _, data)
-
         result = []
         if type(data) is not dict:
             for i in range(len(data)):
@@ -128,7 +128,9 @@ class Partial(object):
         return memo
     reduceRight = reduce_right
 
-    def find(self, data, predicate):
+    def find(self, data, predicate=None):
+        if predicate is None and self.is_func(data):
+            return self.partial(self.find, _, data)
         if type(data) is not dict:
             for i in range(len(data)):
                 if predicate(data[i], i, data):
@@ -139,7 +141,9 @@ class Partial(object):
                     return data[k]
         return None
 
-    def find_i(self, list, predicate):
+    def find_i(self, list, predicate=None):
+        if predicate is None and self.is_func(list):
+            return self.partial(self.find_i, _, list)
         if type(list) is dict:
             return -1
         for i in range(len(list)):
@@ -149,6 +153,8 @@ class Partial(object):
     findIndex = find_index = find_i
 
     def find_k(self, obj, predicate):
+        if predicate is None and self.is_func(obj):
+            return self.partial(self.find_k, _, obj)
         if type(obj) is not dict:
             return None
         for k in obj.keys():
@@ -157,7 +163,9 @@ class Partial(object):
         return None
     findKey = find_key = find_k
 
-    def pluck(self, data, key):
+    def pluck(self, data, key=None):
+        if key is None:
+            return self.partial(self.pluck, _, data)
         return self.map(data, lambda v, *rest: v[key])
 
     def filter(self, data, iteratee=None):
@@ -182,6 +190,26 @@ class Partial(object):
 
     def negate(self, predicate):
         return lambda *args: not predicate(*args)
+
+    def first(self, list, num=1):
+        return list[0:num]
+    head = take = first
+
+    def last(self, list, num=1):
+        return list[-num]
+
+    def initial(self, list, num=1):
+        if num is 0:
+            return list[0:]
+        else:
+            return list[0:-num]
+
+    def rest(self, list, idx=1):
+        return list[idx:len(list)]
+
+    def compact(self, list):
+        return self.filter(list, self.idtt)
+
 
     def keys(self, obj):
         if type(obj) is not dict:
@@ -240,9 +268,6 @@ class Partial(object):
     #         dest[key] = sources[key]
     #     return dest
 
-# _.negate = function (predicate) {
-#     return function () { return !predicate.apply(this, arguments); };
-#   };
 _ = Partial()
 __ = _.pipe
 
