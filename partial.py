@@ -28,6 +28,10 @@ class Partial(object):
         return type(val) is tuple
     isTuple = is_tuple
 
+    def is_list_or_tuple(self, val):
+        t = type(val)
+        return t is list or t is tuple
+
     def is_none(self, val):
         return val is None
     isNone = is_none
@@ -42,7 +46,6 @@ class Partial(object):
         seed = seed() if self.is_func(seed) else seed
         for func in funcs:
             seed = func(*seed.get('value')) if self.is_mr(seed) else func(seed)
-            # seed = func(seed) if not self.is_mr(seed) func(*seed.get('value'))
         return seed
 
     def pipe(self, *funcs):
@@ -149,24 +152,24 @@ class Partial(object):
                     return data[k]
         return None
 
-    def find_i(self, list, predicate=None):
-        if predicate is None and self.is_func(list):
-            return self.partial(self.find_i, _, list)
-        if type(list) is dict:
+    def find_i(self, arr, predicate=None):
+        if predicate is None and self.is_func(arr):
+            return self.partial(self.find_i, _, arr)
+        if type(arr) is dict:
             return -1
-        for i in range(len(list)):
-            if predicate(list[i], i, list):
+        for i in range(len(arr)):
+            if predicate(arr[i], i, arr):
                 return i
         return -1
     findIndex = find_index = find_i
 
-    def find_k(self, dict, predicate):
-        if predicate is None and self.is_func(dict):
-            return self.partial(self.find_k, _, dict)
-        if type(list) is not dict:
+    def find_k(self, obj, predicate):
+        if predicate is None and self.is_func(obj):
+            return self.partial(self.find_k, _, obj)
+        if type(list) is not obj:
             return None
-        for k in dict.keys():
-            if predicate(dict[k], k, dict):
+        for k in obj.keys():
+            if predicate(obj[k], k, obj):
                 return k
         return None
     findKey = find_key = find_k
@@ -199,28 +202,51 @@ class Partial(object):
     def negate(self, predicate):
         return lambda *args: not predicate(*args)
 
-    def first(self, list, num=1):
-        return list[0:num]
+    def first(self, arr, num=1):
+        return arr[0:num]
     head = take = first
 
-    def last(self, list, num=1):
-        return list[-num]
+    def last(self, arr, num=1):
+        return arr[-num]
 
-    def initial(self, list, num=1):
+    def initial(self, arr, num=1):
         if num is 0:
-            return list[0:]
+            return arr[0:]
         else:
-            return list[0:-num]
+            return arr[0:-num]
 
-    def rest(self, list, num=1):
-        return list[num:len(list)]
+    def rest(self, arr, num=1):
+        return arr[num:len(arr)]
     tail = drop = rest
 
-    def compact(self, list):
-        return self.filter(list, self.idtt)
+    def compact(self, arr):
+        return self.filter(arr, self.idtt)
 
-    # def flatten(self, list, shallow=False):
+    def flatten(self, arr, shallow=False):
+        res = []
 
+        def _flat(value):
+            for val in value:
+                if not self.is_list_or_tuple(val):
+                    res.append(val)
+                elif shallow:
+                    self.each(val, lambda v, *rest: res.append(v))
+                else:
+                    _flat(val)
+        _flat(arr)
+        return res
+
+    def difference(self, arr, values):
+        res = []
+
+        for v in arr:
+            if v not in values:
+                res.append(v)
+
+        return res
+
+    def without(self, arr, *values):
+        return self.difference(arr, values)
 
 
 _ = Partial()
