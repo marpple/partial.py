@@ -20,6 +20,14 @@ class Partial(object):
         return type(val) is dict
     isDictionary = is_dictionary = is_dict
 
+    def is_list(self, val):
+        return type(val) is list
+    isList = is_list
+
+    def is_tuple(self, val):
+        return type(val) is tuple
+    isTuple = is_tuple
+
     def is_none(self, val):
         return val is None
     isNone = is_none
@@ -76,10 +84,10 @@ class Partial(object):
         return list(range(start, stop, step))
 
     def each(self, data, iteratee):
-        if type(data) is not dict:
+        if type(data) is list or type(data) is tuple:
             for i in range(len(data)):
                 iteratee(data[i], i, data)
-        else:
+        elif type(data) is dict:
             for k in data.keys():
                 iteratee(data[k], k, data)
 
@@ -87,10 +95,10 @@ class Partial(object):
         if iteratee is None and self.is_func(data):
             return self.partial(self.map, _, data)
         result = []
-        if type(data) is not dict:
+        if type(data) is list or type(data) is tuple:
             for i in range(len(data)):
                 result.append(iteratee(data[i], i, data))
-        else:
+        elif type(data) is dict:
             for k in data.keys():
                 result.append(iteratee(data[k], k, data))
         return result
@@ -98,11 +106,11 @@ class Partial(object):
     def reduce(self, data, iteratee=None, memo=None):
         if self.is_func(data):
             return self.partial(self.reduce, _, data, iteratee)
-        if type(data) is not dict:
+        if type(data) is list or type(data) is tuple:
             memo = memo if memo else data.pop(0)
             for i in range(len(data)):
                 memo = iteratee(memo, data[i], i, data)
-        else:
+        elif type(data) is dict:
             keys = data.keys()
             if memo is None:
                 keys = list(keys)
@@ -114,11 +122,11 @@ class Partial(object):
     def reduce_right(self, data, iteratee=None, memo=None):
         if self.is_func(data):
             return self.partial(self.reduce_right, _, data, iteratee)
-        if type(data) is not dict:
+        if type(data) is list or type(data) is tuple:
             memo = memo if memo else data.pop()
             for i in range(len(data)-1, -1, -1):
                 memo = iteratee(memo, data[i], i, data)
-        else:
+        elif type(data) is dict:
             keys = list(data.keys())
             keys.reverse()
             if memo is None:
@@ -131,11 +139,11 @@ class Partial(object):
     def find(self, data, predicate=None):
         if predicate is None and self.is_func(data):
             return self.partial(self.find, _, data)
-        if type(data) is not dict:
+        if type(data) is list or type(data) is tuple:
             for i in range(len(data)):
                 if predicate(data[i], i, data):
                     return data[i]
-        else:
+        elif type(data) is dict:
             for k in data.keys():
                 if predicate(data[k], k, data):
                     return data[k]
@@ -172,11 +180,11 @@ class Partial(object):
         if iteratee is None and self.is_func(data):
             return self.partial(self.filter, _, data)
         result = []
-        if type(data) is not dict:
+        if type(data) is list or type(data) is tuple:
             for i in range(len(data)):
                 if iteratee(data[i], i, data):
                     result.append(data[i])
-        else:
+        elif type(data) is dict:
             for k in data.keys():
                 if iteratee(data[k], k, data):
                     result.append(data[k])
@@ -204,11 +212,15 @@ class Partial(object):
         else:
             return list[0:-num]
 
-    def rest(self, list, idx=1):
-        return list[idx:len(list)]
+    def rest(self, list, num=1):
+        return list[num:len(list)]
+    tail = drop = rest
 
     def compact(self, list):
         return self.filter(list, self.idtt)
+
+    # def flatten(self, list, shallow=False):
+
 
 
 _ = Partial()
