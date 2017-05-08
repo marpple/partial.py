@@ -238,15 +238,32 @@ class Partial(object):
 
     def difference(self, arr, values):
         res = []
-
         for v in arr:
             if v not in values:
                 res.append(v)
-
         return res
 
     def without(self, arr, *values):
         return self.difference(arr, values)
+
+    def union(self, *arrays):
+        res = []
+        for arr in arrays:
+            for v in arr:
+                if v not in res:
+                    res.append(v)
+        return res
+
+    def intersection(self, *arrays):
+        res, ran, flag = ([], range(len(arrays)), False)
+        for arr in arrays:
+            for v in arr:
+                for i in ran:
+                    flag = True if v in arrays[i] else False
+                if flag and v not in res:
+                    res.append(v)
+                flag = False
+        return res
 
 
 _ = Partial()
