@@ -265,6 +265,14 @@ class Partial(object):
                 flag = False
         return res
 
+    def uniq(self, arr, isSorted=False, iteratee=None):
+        res = []
+        for v in arr:
+            if v not in res:
+                res.append(v)
+        return res
+    unique = uniq
+
 
 _ = Partial()
 __ = _.pipe
