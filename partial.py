@@ -8,9 +8,9 @@ class Partial(object):
     def __init__(self):
         self.VERSION = "0.0.1"
 
-    identity = idtt = lambda self, val: val
+    identity = idtt = lambda self, val, *rest: val
 
-    always = const = lambda self, val: lambda *args: val
+    always = const = lambda self, val, *rest: lambda *args: val
 
     def is_func(self, val):
         return isinstance(val, types.FunctionType) or callable(val)
@@ -191,11 +191,25 @@ class Partial(object):
     def negate(self, predicate):
         return lambda *args: not predicate(*args)
 
-# _.negate = function (predicate) {
-#     return function () { return !predicate.apply(this, arguments); };
-#   };
+    def first(self, list, num=1):
+        return list[0:num]
+    head = take = first
+
+    def last(self, list, num=1):
+        return list[-num]
+
+    def initial(self, list, num=1):
+        if num is 0:
+            return list[0:]
+        else:
+            return list[0:-num]
+
+    def rest(self, list, idx=1):
+        return list[idx:len(list)]
+
+    def compact(self, list):
+        return self.filter(list, self.idtt)
+
+
 _ = Partial()
 __ = _.pipe
-
-
-# print("import partial", _.VERSION)
