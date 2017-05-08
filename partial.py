@@ -166,7 +166,7 @@ class Partial(object):
     def find_k(self, obj, predicate):
         if predicate is None and self.is_func(obj):
             return self.partial(self.find_k, _, obj)
-        if type(list) is not obj:
+        if type(obj) is not dict:
             return None
         for k in obj.keys():
             if predicate(obj[k], k, obj):
@@ -273,6 +273,63 @@ class Partial(object):
         return res
     unique = uniq
 
+
+    def keys(self, obj):
+        if type(obj) is not dict:
+            return []
+        return obj.keys()
+
+    def values(self, obj):
+        if type(obj) is not dict:
+            return []
+        return obj.values()
+
+    def mapObject(self, obj, iteratee=None):
+        if iteratee is None and self.is_func(obj):
+            return self.partial(self.mapObject, _, obj)
+        res = {}
+        for key in obj.keys():
+            res[key] = iteratee(float(obj[key]),key,obj)
+        return res
+
+    def pairs(self, obj):
+        res = []
+        for key in obj.keys():
+            res.append([key, obj[key]])
+        return res
+
+    def invert(self, obj):
+        res = {}
+        for key in obj.keys():
+            res[obj[key]] = key
+        return res
+
+    # def extend1(self, dest, sources):
+    #     for key in sources.keys():
+    #         dest[key] = sources[key]
+    #     return dest
+
+    def extend(self, dest, *sources):
+        sources = list(sources)
+        for i in sources:
+            dest.update(i)
+        return dest
+
+    def defaults(self, dest, sources):
+        for key in sources:
+            dest.setdefault(key, sources[key])
+        return dest
+
+    # def defaults(self, dest, *sources):
+    #     sources = list(sources)
+    #     for i in sources:
+    #         dest.update(i)
+    #     return dest
+
+    # def extend(self, dest, sources):
+    #     for key in sources.keys():
+    #         dest[key] = sources[key]
+    #     return dest
 
 _ = Partial()
 __ = _.pipe
