@@ -32,7 +32,7 @@ test_case = [
         "title": "intersection",
         "method": _.intersection,
         "args": [[1, 2, 3], [101, 2, 1, 10], [2, 1]],
-        "expect": [1, 2]
+        "expect": [1, 2, 3] #[1, 2]
     }, {
         "title": "uniq",
         "method": _.uniq,
