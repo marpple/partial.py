@@ -265,14 +265,13 @@ class Partial(object):
                 flag = False
         return res
 
-    def uniq(self, arr, isSorted=False, iteratee=None):
+    def uniq(self, arr, iteratee=None):
         res = []
         for v in arr:
             if v not in res:
                 res.append(v)
         return res
     unique = uniq
-
 
     def keys(self, obj):
         if type(obj) is not dict:
