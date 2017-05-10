@@ -20,6 +20,18 @@ class Partial(object):
         return type(val) is dict
     isDictionary = is_dictionary = is_dict
 
+    def is_list(self, val):
+        return type(val) is list
+    isList = is_list
+
+    def is_tuple(self, val):
+        return type(val) is tuple
+    isTuple = is_tuple
+
+    def is_list_or_tuple(self, val):
+        t = type(val)
+        return t is list or t is tuple
+
     def is_none(self, val):
         return val is None
     isNone = is_none
@@ -34,7 +46,6 @@ class Partial(object):
         seed = seed() if self.is_func(seed) else seed
         for func in funcs:
             seed = func(*seed.get('value')) if self.is_mr(seed) else func(seed)
-            # seed = func(seed) if not self.is_mr(seed) func(*seed.get('value'))
         return seed
 
     def pipe(self, *funcs):
@@ -76,10 +87,10 @@ class Partial(object):
         return list(range(start, stop, step))
 
     def each(self, data, iteratee):
-        if type(data) is not dict:
+        if type(data) is list or type(data) is tuple:
             for i in range(len(data)):
                 iteratee(data[i], i, data)
-        else:
+        elif type(data) is dict:
             for k in data.keys():
                 iteratee(data[k], k, data)
 
@@ -87,10 +98,10 @@ class Partial(object):
         if iteratee is None and self.is_func(data):
             return self.partial(self.map, _, data)
         result = []
-        if type(data) is not dict:
+        if type(data) is list or type(data) is tuple:
             for i in range(len(data)):
                 result.append(iteratee(data[i], i, data))
-        else:
+        elif type(data) is dict:
             for k in data.keys():
                 result.append(iteratee(data[k], k, data))
         return result
@@ -98,11 +109,11 @@ class Partial(object):
     def reduce(self, data, iteratee=None, memo=None):
         if self.is_func(data):
             return self.partial(self.reduce, _, data, iteratee)
-        if type(data) is not dict:
+        if type(data) is list or type(data) is tuple:
             memo = memo if memo else data.pop(0)
             for i in range(len(data)):
                 memo = iteratee(memo, data[i], i, data)
-        else:
+        elif type(data) is dict:
             keys = data.keys()
             if memo is None:
                 keys = list(keys)
@@ -114,11 +125,11 @@ class Partial(object):
     def reduce_right(self, data, iteratee=None, memo=None):
         if self.is_func(data):
             return self.partial(self.reduce_right, _, data, iteratee)
-        if type(data) is not dict:
+        if type(data) is list or type(data) is tuple:
             memo = memo if memo else data.pop()
             for i in range(len(data)-1, -1, -1):
                 memo = iteratee(memo, data[i], i, data)
-        else:
+        elif type(data) is dict:
             keys = list(data.keys())
             keys.reverse()
             if memo is None:
@@ -131,23 +142,23 @@ class Partial(object):
     def find(self, data, predicate=None):
         if predicate is None and self.is_func(data):
             return self.partial(self.find, _, data)
-        if type(data) is not dict:
+        if type(data) is list or type(data) is tuple:
             for i in range(len(data)):
                 if predicate(data[i], i, data):
                     return data[i]
-        else:
+        elif type(data) is dict:
             for k in data.keys():
                 if predicate(data[k], k, data):
                     return data[k]
         return None
 
-    def find_i(self, list, predicate=None):
-        if predicate is None and self.is_func(list):
-            return self.partial(self.find_i, _, list)
-        if type(list) is dict:
+    def find_i(self, arr, predicate=None):
+        if predicate is None and self.is_func(arr):
+            return self.partial(self.find_i, _, arr)
+        if type(arr) is dict:
             return -1
-        for i in range(len(list)):
-            if predicate(list[i], i, list):
+        for i in range(len(arr)):
+            if predicate(arr[i], i, arr):
                 return i
         return -1
     findIndex = find_index = find_i
@@ -172,11 +183,11 @@ class Partial(object):
         if iteratee is None and self.is_func(data):
             return self.partial(self.filter, _, data)
         result = []
-        if type(data) is not dict:
+        if type(data) is list or type(data) is tuple:
             for i in range(len(data)):
                 if iteratee(data[i], i, data):
                     result.append(data[i])
-        else:
+        elif type(data) is dict:
             for k in data.keys():
                 if iteratee(data[k], k, data):
                     result.append(data[k])
@@ -191,24 +202,76 @@ class Partial(object):
     def negate(self, predicate):
         return lambda *args: not predicate(*args)
 
-    def first(self, list, num=1):
-        return list[0:num]
+    def first(self, arr, num=1):
+        return arr[0:num]
     head = take = first
 
-    def last(self, list, num=1):
-        return list[-num]
+    def last(self, arr, num=1):
+        return arr[-num]
 
-    def initial(self, list, num=1):
+    def initial(self, arr, num=1):
         if num is 0:
-            return list[0:]
+            return arr[0:]
         else:
-            return list[0:-num]
+            return arr[0:-num]
 
-    def rest(self, list, idx=1):
-        return list[idx:len(list)]
+    def rest(self, arr, num=1):
+        return arr[num:len(arr)]
+    tail = drop = rest
 
-    def compact(self, list):
-        return self.filter(list, self.idtt)
+    def compact(self, arr):
+        return self.filter(arr, self.idtt)
+
+    def flatten(self, arr, shallow=False):
+        res = []
+
+        def _flat(value):
+            for val in value:
+                if not self.is_list_or_tuple(val):
+                    res.append(val)
+                elif shallow:
+                    self.each(val, lambda v, *rest: res.append(v))
+                else:
+                    _flat(val)
+        _flat(arr)
+        return res
+
+    def difference(self, arr, values):
+        res = []
+        for v in arr:
+            if v not in values:
+                res.append(v)
+        return res
+
+    def without(self, arr, *values):
+        return self.difference(arr, values)
+
+    def union(self, *arrays):
+        res = []
+        for arr in arrays:
+            for v in arr:
+                if v not in res:
+                    res.append(v)
+        return res
+
+    def intersection(self, *arrays):
+        res, ran, flag = ([], range(len(arrays)), False)
+        for arr in arrays:
+            for v in arr:
+                for i in ran:
+                    flag = True if v in arrays[i] else False
+                if flag and v not in res:
+                    res.append(v)
+                flag = False
+        return res
+
+    def uniq(self, arr, isSorted=False, iteratee=None):
+        res = []
+        for v in arr:
+            if v not in res:
+                res.append(v)
+        return res
+    unique = uniq
 
 
     def keys(self, obj):
@@ -329,6 +392,3 @@ class Partial(object):
 
 _ = Partial()
 __ = _.pipe
-
-
-# print("import partial", _.VERSION)
