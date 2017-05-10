@@ -86,25 +86,25 @@ class Partial(object):
             return list(range(start, stop))
         return list(range(start, stop, step))
 
-    def each(self, data, iteratee):
+    def each(self, data, iter):
         if type(data) is list or type(data) is tuple:
             for i in range(len(data)):
-                iteratee(data[i], i, data)
+                iter(data[i], i, data)
         elif type(data) is dict:
             for k in data.keys():
-                iteratee(data[k], k, data)
+                iter(data[k], k, data)
 
     def map(self, data, iteratee=None):
         if iteratee is None and self.is_func(data):
             return self.partial(self.map, _, data)
-        result = []
+        res = []
         if type(data) is list or type(data) is tuple:
             for i in range(len(data)):
-                result.append(iteratee(data[i], i, data))
+                res.append(iteratee(data[i], i, data))
         elif type(data) is dict:
             for k in data.keys():
-                result.append(iteratee(data[k], k, data))
-        return result
+                res.append(iteratee(data[k], k, data))
+        return res
 
     def reduce(self, data, iteratee=None, memo=None):
         if self.is_func(data):
@@ -179,25 +179,68 @@ class Partial(object):
             return self.partial(self.pluck, _, data)
         return self.map(data, lambda v, *rest: v[key])
 
-    def filter(self, data, iteratee=None):
-        if iteratee is None and self.is_func(data):
+    def filter(self, data, predicate=None):
+        if predicate is None and self.is_func(data):
             return self.partial(self.filter, _, data)
-        result = []
+        res = []
         if type(data) is list or type(data) is tuple:
             for i in range(len(data)):
-                if iteratee(data[i], i, data):
-                    result.append(data[i])
+                if predicate(data[i], i, data):
+                    res.append(data[i])
         elif type(data) is dict:
             for k in data.keys():
-                if iteratee(data[k], k, data):
-                    result.append(data[k])
-        return result
+                if predicate(data[k], k, data):
+                    res.append(data[k])
+        return res
 
-    def reject(self, data, iteratee=None):
-        if iteratee is None and self.is_func(data):
+    def reject(self, data, predicate=None):
+        if predicate is None and self.is_func(data):
             return self.partial(self.reject, _, data)
+        return self.filter(data, self.negate(predicate))
 
-        return self.filter(data, self.negate(iteratee))
+    def max(self, data, iteratee=None):
+        if iteratee is None and self.is_func(data):
+            return self.partial(self.max, _, data)
+
+        iter = iteratee if iteratee else self.idtt
+        if self.is_list_or_tuple(data):
+            res, tmp = (data[0], iter(data[0], 0, data))
+            for i in range(1, len(data)):
+                cmp = iter(data[i], i, data)
+                if cmp > tmp:
+                    tmp = cmp
+                    res = data[i]
+        else:
+            keys = list(data.keys())
+            res, tmp = (data[keys[0]], iter(data[keys[0]], keys.pop(0), data))
+            for k in keys:
+                cmp = iter(data[k], k, data)
+                if cmp > tmp:
+                    tmp = cmp
+                    res = data[k]
+        return res
+
+    def min(self, data, iteratee=None):
+        if iteratee is None and self.is_func(data):
+            return self.partial(self.min, _, data)
+
+        iter = iteratee if iteratee else self.idtt
+        if self.is_list_or_tuple(data):
+            res, tmp = (data[0], iter(data[0], 0, data))
+            for i in range(1, len(data)):
+                cmp = iter(data[i], i, data)
+                if cmp < tmp:
+                    tmp = cmp
+                    res = data[i]
+        else:
+            keys = list(data.keys())
+            res, tmp = (data[keys[0]], iter(data[keys[0]], keys.pop(0), data))
+            for k in keys:
+                cmp = iter(data[k], k, data)
+                if cmp < tmp:
+                    tmp = cmp
+                    res = data[k]
+        return res
 
     def negate(self, predicate):
         return lambda *args: not predicate(*args)
@@ -266,12 +309,22 @@ class Partial(object):
         return res
 
     def uniq(self, arr, iteratee=None):
-        res = []
-        for v in arr:
-            if v not in res:
-                res.append(v)
+        res, tmp, cmp = ([], [], self.map(arr, iteratee) if iteratee else arr)
+        for i in range(len(arr)):
+            if cmp[i] not in tmp:
+                tmp.append(cmp[i])
+                res.append(arr[i])
         return res
     unique = uniq
+
+    def zip(self, *arrays):
+        return self.unzip(arrays)
+
+    def unzip(self, array):
+        res, ran = ([], range(len(array)))
+        for i in ran:
+            res.append(self.pluck(array, i))
+        return res
 
     def keys(self, obj):
         if type(obj) is not dict:
@@ -306,7 +359,7 @@ class Partial(object):
             return self.partial(self.mapObject, _, obj)
         res = {}
         for key in obj.keys():
-            res[key] = iteratee(float(obj[key]),key,obj)
+            res[key] = iteratee(float(obj[key]), key, obj)
         return res
 
     def pairs(self, obj):
@@ -321,7 +374,6 @@ class Partial(object):
         for key in obj.keys():
             res[obj[key]] = key
         return res
-
 
     def has(self, obj, *keys):
         for key in keys:
