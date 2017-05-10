@@ -48,7 +48,7 @@ def test(cases):
             print("%-13s: PASS" % case["title"])
         else:
             print("%-13s: FAIL" % case["title"])
-            print("## expect:", case["expect"], "# result:", case["method"](*case["args"]), "##")
+            print("## expect:", case["expect"], "/ result:", case["method"](*case["args"]), "##")
 
 
 test(test_case)
