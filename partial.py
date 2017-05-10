@@ -177,7 +177,15 @@ class Partial(object):
     def pluck(self, data, key=None):
         if key is None:
             return self.partial(self.pluck, _, data)
-        return self.map(data, lambda v, *rest: v[key])
+
+        def iter(d, *r):
+            if self.is_list_or_tuple(d) and key >= len(d):
+                return None
+            if d is dict and key not in d.keys():
+                return None
+            return d[key]
+
+        return self.map(data, iter)
 
     def filter(self, data, predicate=None):
         if predicate is None and self.is_func(data):
@@ -321,7 +329,7 @@ class Partial(object):
         return self.unzip(arrays)
 
     def unzip(self, array):
-        res, ran = ([], range(len(array)))
+        res, ran = ([], range(len(array and self.max(array, lambda a, *r: len(a)))))
         for i in ran:
             res.append(self.pluck(array, i))
         return res

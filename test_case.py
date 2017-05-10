@@ -48,21 +48,21 @@ test_case = {
         "args": [ ['moe', 'larry', 'curly'], [30, 40, 50], [True, False, False] ],
         "expect": [["moe", 30, True], ["larry", 40, False], ["curly", 50, False]]
     },
-    # "zip2": {
-    #     "method": _.zip,
-    #     "args": [ ['moe', 'larry', 'curly'], [30, 40, 50], [True, False, False], ['KKK'] ],
-    #     "expect": [["moe", 30, True, "KKK"], ["larry", 40, False, None], ["curly", 50, False, None]]
-    # },
+    "zip2": {
+        "method": _.zip,
+        "args": [ ['moe', 'larry', 'curly'], [30, 40, 50], [True, False, False], ['KKK'] ],
+        "expect": [["moe", 30, True, "KKK"], ["larry", 40, False, None], ["curly", 50, False, None]]
+    },
     "unzip1": {
         "method": _.unzip,
         "args": [ [["moe", 30, True], ["larry", 40, False], ["curly", 50, False]] ],
         "expect": [['moe', 'larry', 'curly'], [30, 40, 50], [True, False, False]]
     },
-    # "unzip2": {
-    #     "method": _.unzip,
-    #     "args": [ [["moe", 30, True], ["larry", 40, False], ["curly", 50, False, "KKK"]] ],
-    #     "expect": [['moe', 'larry', 'curly'], [30, 40, 50], [True, False, False], [None, None, 'KKK']]
-    # },
+    "unzip2": {
+        "method": _.unzip,
+        "args": [ [["moe", 30, True], ["larry", 40, False], ["curly", 50, False, "KKK"]] ],
+        "expect": [['moe', 'larry', 'curly'], [30, 40, 50], [True, False, False], [None, None, 'KKK']]
+    },
     "max1": {
         "method": _.max,
         "args": [ [1,2,3,4,5] ],
@@ -96,5 +96,4 @@ def test(cases, key=None):
     for key in keys:
         _t(cases[key]['method'], cases[key]['args'], cases[key]['expect'], key)
 
-# test(test_case, 'zip1')
 test(test_case)
