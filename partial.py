@@ -221,6 +221,24 @@ class Partial(object):
             return []
         return obj.values()
 
+    def val(self, obj, *keys):
+        if len(keys) is 1:
+            neww = obj[keys[0]]
+        else:
+            neww = []
+            for key in keys:
+                try:
+                    neww.append(obj[key])
+                except:
+                    continue
+        return neww
+
+    def property(self, key):
+        return self.partial(self.val, _, key)
+
+    def propertyOf(self, key):
+        return self.partial(self.val, key, _)
+
     def mapObject(self, obj, iteratee=None):
         if iteratee is None and self.is_func(obj):
             return self.partial(self.mapObject, _, obj)
@@ -230,10 +248,11 @@ class Partial(object):
         return res
 
     def pairs(self, obj):
-        res = []
-        for key in obj.keys():
-            res.append([key, obj[key]])
-        return res
+        # res = []
+        # for key in obj.keys():
+        #     res.append([key, obj[key]])
+        # return res
+        return obj.items()
 
     def invert(self, obj):
         res = {}
@@ -241,10 +260,15 @@ class Partial(object):
             res[obj[key]] = key
         return res
 
-    # def extend1(self, dest, sources):
-    #     for key in sources.keys():
-    #         dest[key] = sources[key]
-    #     return dest
+
+    def has(self, obj, *keys):
+        for key in keys:
+            try:
+                if obj[key]:
+                   res = 'true'
+            except:
+                return 'false'
+        return res
 
     def extend(self, dest, *sources):
         sources = list(sources)
@@ -256,6 +280,41 @@ class Partial(object):
         for key in sources:
             dest.setdefault(key, sources[key])
         return dest
+
+    def is_equal(self, obj1, obj2=None):
+        if obj2 is None:
+            return self.partial(self.is_equal, _, obj1)
+        return obj1 is obj2
+
+    def pick(self, obj, *keys):
+        if len(keys) is 0:
+            return self.partial(self.pick, _, obj)
+        res = {}
+        if self.is_func(keys[0]):
+            for key in obj:
+                if keys[0](obj[key], key, obj):
+                    res[key] = obj[key]
+        else:
+            for key in keys:
+                res[key] = obj[key]
+        return res
+
+    def omit(self, obj, *keys):
+        if len(keys) is 0:
+            return self.partial(self.omit, _, obj)
+        res = obj.copy()
+        if self.is_func(keys[0]):
+            for key in obj:
+                if keys[0](obj[key], key, obj):
+                    del res[key]
+        else:
+            for key in keys:
+                if res[key]:
+                    del res[key]
+        return res
+
+    def clone(self, obj):
+        return obj.copy()
 
     # def defaults(self, dest, *sources):
     #     sources = list(sources)
