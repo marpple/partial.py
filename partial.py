@@ -8,40 +8,7 @@ class Partial(object):
     def __init__(self):
         self.VERSION = "0.0.1"
 
-    identity = idtt = lambda self, val, *rest: val
-
-    always = const = lambda self, val, *rest: lambda *args: val
-
-    def is_func(self, val):
-        return isinstance(val, types.FunctionType) or callable(val)
-    isFunction = is_function = is_func
-
-    def is_dict(self, val):
-        return type(val) is dict
-    isDictionary = is_dictionary = is_dict
-
-    def is_list(self, val):
-        return type(val) is list
-    isList = is_list
-
-    def is_tuple(self, val):
-        return type(val) is tuple
-    isTuple = is_tuple
-
-    def is_list_or_tuple(self, val):
-        t = type(val)
-        return t is list or t is tuple
-
-    def is_none(self, val):
-        return val is None
-    isNone = is_none
-
-    def is_mr(self, val):
-        return self.is_dict(val) and val.get('_mr')
-
-    def mr(self, *args):
-        return {'value': args, '_mr': True}
-
+    # go, pipe, partial
     def go(self, seed, *funcs):
         seed = seed() if self.is_func(seed) else seed
         for func in funcs:
@@ -79,13 +46,7 @@ class Partial(object):
 
         return _partial
 
-    def range(self, start, stop=None, step=None):
-        if stop is None:
-            return list(range(start))
-        if step is None:
-            return list(range(start, stop))
-        return list(range(start, stop, step))
-
+    # Collections
     def each(self, data, iter):
         if type(data) is list or type(data) is tuple:
             for i in range(len(data)):
@@ -93,6 +54,7 @@ class Partial(object):
         elif type(data) is dict:
             for k in data.keys():
                 iter(data[k], k, data)
+    forEach = each
 
     def map(self, data, iteratee=None):
         if iteratee is None and self.is_func(data):
@@ -105,6 +67,7 @@ class Partial(object):
             for k in data.keys():
                 res.append(iteratee(data[k], k, data))
         return res
+    collect = map
 
     def reduce(self, data, iteratee=None, memo=None):
         if self.is_func(data):
@@ -121,6 +84,7 @@ class Partial(object):
             for k in keys:
                 memo = iteratee(memo, data[k], k, data)
         return memo
+    inject = fold = reduce
 
     def reduce_right(self, data, iteratee=None, memo=None):
         if self.is_func(data):
@@ -137,7 +101,7 @@ class Partial(object):
             for k in keys:
                 memo = iteratee(memo, data[k], k, data)
         return memo
-    reduceRight = reduce_right
+    foldr = reduceRight = reduce_right
 
     def find(self, data, predicate=None):
         if predicate is None and self.is_func(data):
@@ -151,6 +115,281 @@ class Partial(object):
                 if predicate(data[k], k, data):
                     return data[k]
         return None
+    detect = find
+
+    def filter(self, data, predicate=None):
+        if predicate is None and self.is_func(data):
+            return self.partial(self.filter, _, data)
+        res = []
+        if type(data) is list or type(data) is tuple:
+            for i in range(len(data)):
+                if predicate(data[i], i, data):
+                    res.append(data[i])
+        elif type(data) is dict:
+            for k in data.keys():
+                if predicate(data[k], k, data):
+                    res.append(data[k])
+        return res
+    select = filter
+
+    # def where(self, data, properties):
+
+    # def find_where(self, data, properties):
+
+    def reject(self, data, predicate=None):
+        if predicate is None and self.is_func(data):
+            return self.partial(self.reject, _, data)
+        return self.filter(data, self.negate(predicate))
+
+    def every(self, data, predicate=None):
+        if predicate is None and self.is_func(data):
+            return self.partial(self.every, _, data)
+        pred = predicate or self.idtt
+        if type(data) is list or type(data) is tuple:
+            for i in range(len(data)):
+                if not pred(data[i], i, data):
+                    return False
+        elif type(data) is dict:
+            for k in data.keys():
+                if not pred(data[k], k, data):
+                    return False
+        return True
+
+    def some(self, data, predicate=None):
+        if predicate is None and self.is_func(data):
+            return self.partial(self.every, _, data)
+        pred = predicate or self.idtt
+        if type(data) is list or type(data) is tuple:
+            for i in range(len(data)):
+                if pred(data[i], i, data):
+                    return True
+        elif type(data) is dict:
+            for k in data.keys():
+                if pred(data[k], k, data):
+                    return True
+        return False
+    any = some
+
+    def contains(self, data, item, fromIndex=0):
+        data = list(data.values())[fromIndex:] if type(data) is dict else data[fromIndex:]
+        return item in data
+    includes = contains
+
+    def pluck(self, data, key=None):
+        if key is None:
+            return self.partial(self.pluck, _, data)
+        def iter(d, *r):
+            if self.is_list_or_tuple(d) and key >= len(d):
+                return None
+            if d is dict and key not in d.keys():
+                return None
+            return d[key]
+
+        return self.map(data, iter)
+
+    def max(self, data, iteratee=None):
+        if iteratee is None and self.is_func(data):
+            return self.partial(self.max, _, data)
+        iter = iteratee or self.idtt
+        if self.is_list_or_tuple(data):
+            res, tmp = (data[0], iter(data[0], 0, data))
+            for i in range(1, len(data)):
+                cmp = iter(data[i], i, data)
+                if cmp > tmp:
+                    tmp, res = (cmp, data[i])
+        else:
+            keys = list(data.keys())
+            res, tmp = (data[keys[0]], iter(data[keys[0]], keys.pop(0), data))
+            for k in keys:
+                cmp = iter(data[k], k, data)
+                if cmp > tmp:
+                    tmp, res = (cmp, data[k])
+        return res
+
+    def min(self, data, iteratee=None):
+        if iteratee is None and self.is_func(data):
+            return self.partial(self.min, _, data)
+        iter = iteratee or self.idtt
+        if self.is_list_or_tuple(data):
+            res, tmp = (data[0], iter(data[0], 0, data))
+            for i in range(1, len(data)):
+                cmp = iter(data[i], i, data)
+                if cmp < tmp:
+                    tmp, res = (cmp, data[i])
+        else:
+            keys = list(data.keys())
+            res, tmp = (data[keys[0]], iter(data[keys[0]], keys.pop(0), data))
+            for k in keys:
+                cmp = iter(data[k], k, data)
+                if cmp < tmp:
+                    tmp, res = (cmp, data[k])
+        return res
+
+    # def sortBy(self, data, iteratee):
+
+    # def groupBy(self, data, iteratee):
+
+    # def indexBy(self, data, iteratee):
+
+    # def countBy(self, data, iteratee):
+
+    # def shuffle(self, data):
+
+    # def sample(self, data, *n):
+
+    # def to_array(self, data):
+
+    # def size(self, data):
+
+    # def partition(self, data, predicate):
+
+    # Arrays
+    def first(self, arr, num=None):
+        if num is None:
+            return arr[0]
+        return arr[0:num]
+    head = take = first
+
+    def initial(self, arr, num=1):
+        if num is 0:
+            return arr[0:]
+        else:
+            return arr[0:-num]
+
+    def last(self, arr, num=None):
+        if num is None:
+            return arr[-1]
+        return arr[-num:]
+
+    def rest(self, arr, num=1):
+        return arr[num:len(arr)]
+    tail = drop = rest
+
+    def compact(self, arr):
+        return self.filter(arr, self.idtt)
+
+    def flatten(self, arr, shallow=False):
+        res = []
+
+        def flat(value):
+            for val in value:
+                if not self.is_list_or_tuple(val):
+                    res.append(val)
+                elif shallow:
+                    self.each(val, lambda v, *rest: res.append(v))
+                else:
+                    flat(val)
+
+        flat(arr)
+        return res
+
+    def uniq(self, arr, iteratee=None):
+        res, tmp, cmp = ([], [], self.map(arr, iteratee) if iteratee else arr)
+        for i in range(len(arr)):
+            if cmp[i] not in tmp:
+                tmp.append(cmp[i])
+                res.append(arr[i])
+        return res
+    unique = uniq
+
+    def without(self, arr, *values):
+        return self.difference(arr, values)
+
+    def intersection(self, arr, *args):
+        res, flag = ([], True)
+        for item in arr:
+            if item in res: continue
+            for cmp in args:
+                if item not in cmp:
+                    flag = False
+                    break
+            if flag:
+                res.append(item)
+            else:
+                flag = True
+        return res
+
+    def union(self, *arrays):
+        res = []
+        for arr in arrays:
+            for v in arr:
+                if v not in res:
+                    res.append(v)
+        return res
+
+    def difference(self, arr, *others):
+        res, cmp = ([], self.flatten(others))
+        for a in arr:
+            if type(a) is dict:
+                for c in cmp:
+                    if id(a) != id(c):
+                        res.append(a)
+            elif a not in cmp:
+                res.append(a)
+        return res
+
+    def zip(self, *arrays):
+        return self.unzip(arrays)
+
+    def unzip(self, array):
+        res, ran = ([], range(len(array and self.max(array, lambda a, *r: len(a)))))
+        for i in ran:
+            res.append(self.pluck(array, i))
+        return res
+
+    # def object(self, arr, *values):
+
+    # def index_of(self, arr, value):
+
+    # def last_index_of(self, arr, value):
+
+    # def sorted_index(self, arr, value, iteratee=None):
+
+    # def find_index(self, arr, predicate):
+
+    # def find_last_index(self, arr, predicate):
+
+    def range(self, start, stop=None, step=None):
+        if stop is None:
+            return list(range(start))
+        if step is None:
+            return list(range(start, stop))
+        return list(range(start, stop, step))
+
+    # Utility
+    identity = idtt = lambda self, val, *rest: val
+
+    always = const = lambda self, val, *rest: lambda *args: val
+
+    def is_func(self, val):
+        return isinstance(val, types.FunctionType) or callable(val)
+    isFunction = is_function = is_func
+
+    def is_dict(self, val):
+        return type(val) is dict
+    isDictionary = is_dictionary = is_dict
+
+    def is_list(self, val):
+        return type(val) is list
+    isList = is_list
+
+    def is_tuple(self, val):
+        return type(val) is tuple
+    isTuple = is_tuple
+
+    def is_list_or_tuple(self, val):
+        t = type(val)
+        return t is list or t is tuple
+
+    def is_none(self, val):
+        return val is None
+    isNone = is_none
+
+    def is_mr(self, val):
+        return self.is_dict(val) and val.get('_mr')
+
+    def mr(self, *args):
+        return {'value': args, '_mr': True}
 
     def find_i(self, arr, predicate=None):
         if predicate is None and self.is_func(arr):
@@ -174,166 +413,10 @@ class Partial(object):
         return None
     findKey = find_key = find_k
 
-    def pluck(self, data, key=None):
-        if key is None:
-            return self.partial(self.pluck, _, data)
-
-        def iter(d, *r):
-            if self.is_list_or_tuple(d) and key >= len(d):
-                return None
-            if d is dict and key not in d.keys():
-                return None
-            return d[key]
-
-        return self.map(data, iter)
-
-    def filter(self, data, predicate=None):
-        if predicate is None and self.is_func(data):
-            return self.partial(self.filter, _, data)
-        res = []
-        if type(data) is list or type(data) is tuple:
-            for i in range(len(data)):
-                if predicate(data[i], i, data):
-                    res.append(data[i])
-        elif type(data) is dict:
-            for k in data.keys():
-                if predicate(data[k], k, data):
-                    res.append(data[k])
-        return res
-
-    def reject(self, data, predicate=None):
-        if predicate is None and self.is_func(data):
-            return self.partial(self.reject, _, data)
-        return self.filter(data, self.negate(predicate))
-
-    def max(self, data, iteratee=None):
-        if iteratee is None and self.is_func(data):
-            return self.partial(self.max, _, data)
-
-        iter = iteratee if iteratee else self.idtt
-        if self.is_list_or_tuple(data):
-            res, tmp = (data[0], iter(data[0], 0, data))
-            for i in range(1, len(data)):
-                cmp = iter(data[i], i, data)
-                if cmp > tmp:
-                    tmp = cmp
-                    res = data[i]
-        else:
-            keys = list(data.keys())
-            res, tmp = (data[keys[0]], iter(data[keys[0]], keys.pop(0), data))
-            for k in keys:
-                cmp = iter(data[k], k, data)
-                if cmp > tmp:
-                    tmp = cmp
-                    res = data[k]
-        return res
-
-    def min(self, data, iteratee=None):
-        if iteratee is None and self.is_func(data):
-            return self.partial(self.min, _, data)
-
-        iter = iteratee if iteratee else self.idtt
-        if self.is_list_or_tuple(data):
-            res, tmp = (data[0], iter(data[0], 0, data))
-            for i in range(1, len(data)):
-                cmp = iter(data[i], i, data)
-                if cmp < tmp:
-                    tmp = cmp
-                    res = data[i]
-        else:
-            keys = list(data.keys())
-            res, tmp = (data[keys[0]], iter(data[keys[0]], keys.pop(0), data))
-            for k in keys:
-                cmp = iter(data[k], k, data)
-                if cmp < tmp:
-                    tmp = cmp
-                    res = data[k]
-        return res
-
     def negate(self, predicate):
         return lambda *args: not predicate(*args)
 
-    def first(self, arr, num=1):
-        return arr[0:num]
-    head = take = first
-
-    def last(self, arr, num=1):
-        return arr[-num]
-
-    def initial(self, arr, num=1):
-        if num is 0:
-            return arr[0:]
-        else:
-            return arr[0:-num]
-
-    def rest(self, arr, num=1):
-        return arr[num:len(arr)]
-    tail = drop = rest
-
-    def compact(self, arr):
-        return self.filter(arr, self.idtt)
-
-    def flatten(self, arr, shallow=False):
-        res = []
-
-        def _flat(value):
-            for val in value:
-                if not self.is_list_or_tuple(val):
-                    res.append(val)
-                elif shallow:
-                    self.each(val, lambda v, *rest: res.append(v))
-                else:
-                    _flat(val)
-        _flat(arr)
-        return res
-
-    def difference(self, arr, values):
-        res = []
-        for v in arr:
-            if v not in values:
-                res.append(v)
-        return res
-
-    def without(self, arr, *values):
-        return self.difference(arr, values)
-
-    def union(self, *arrays):
-        res = []
-        for arr in arrays:
-            for v in arr:
-                if v not in res:
-                    res.append(v)
-        return res
-
-    def intersection(self, *arrays):
-        res, ran, flag = ([], range(len(arrays)), False)
-        for arr in arrays:
-            for v in arr:
-                for i in ran:
-                    flag = True if v in arrays[i] else False
-                if flag and v not in res:
-                    res.append(v)
-                flag = False
-        return res
-
-    def uniq(self, arr, iteratee=None):
-        res, tmp, cmp = ([], [], self.map(arr, iteratee) if iteratee else arr)
-        for i in range(len(arr)):
-            if cmp[i] not in tmp:
-                tmp.append(cmp[i])
-                res.append(arr[i])
-        return res
-    unique = uniq
-
-    def zip(self, *arrays):
-        return self.unzip(arrays)
-
-    def unzip(self, array):
-        res, ran = ([], range(len(array and self.max(array, lambda a, *r: len(a)))))
-        for i in ran:
-            res.append(self.pluck(array, i))
-        return res
-
+    # Objects
     def keys(self, obj):
         if type(obj) is not dict:
             return []
