@@ -65,13 +65,33 @@ test_case = {
     },
     "max1": {
         "method": _.max,
-        "args": [ [1,2,3,4,5] ],
+        "args": [ [1, 2, 3, 4, 5] ],
         "expect": 5
     },
     "max2": {
         "method": _.max,
         "args": [ [{'name': 'moe', 'age': 40}, {'name': 'larry', 'age': 50}, {'name': 'curly', 'age': 60}], lambda v, *r: v['age'] ],
         "expect": {'name': 'curly', 'age': 60}
+    },
+    "every": {
+        "method": _.every,
+        "args": [ [2, 4, 5], lambda n, *r: n % 2 == 0 ],
+        "expect": False
+    },
+    "some": {
+        "method": _.some,
+        "args": [ [[], 0, 'yes', ''] ],
+        "expect": True
+    },
+    "contains1": {
+        "method": _.contains,
+        "args": [ [1, 2, 3], 3 ],
+        "expect": True
+    },
+    "contains2": {
+        "method": _.contains,
+        "args": [ {'name': 'moe', 'age': 40}, 40 ],
+        "expect": True
     }
 }
 
@@ -96,4 +116,10 @@ def test(cases, key=None):
     for key in keys:
         _t(cases[key]['method'], cases[key]['args'], cases[key]['expect'], key)
 
-test(test_case)
+
+# test(test_case)
+
+stooges = ['moe', 'curly', 'larry']
+leaders = ['moe', 'groucho']
+
+print(_.intersection(stooges))
