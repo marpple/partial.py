@@ -438,6 +438,32 @@ class Partial(object):
     def clone(self, obj):
         return obj.copy()
 
+#     function
+#     f(object, attrs)
+#     {
+#     if (arguments.length == 1)
+#     return _(f, _, object);
+#     var
+#     keys = _.keys(attrs), length = keys.length;
+#     if (object == null) return !length;
+#     for (var i = 0, obj = Object(object), key; i < length; i++)
+#     if (attrs[key = keys[i]] != obj[key] | | !(key in obj)) return false;
+#
+#
+# return true;
+# };
+    def matcher(self, obj, attrs=None):
+        if attrs is None : return self.partial(self.matcher, _, obj)
+
+        keys = self.keys(attrs)
+
+        for key in keys:
+            if attrs[key] != obj[key]:
+                return 'false'
+        return 'true'
+
+        # return lambda v, i, li: v == obj
+
     # def defaults(self, dest, *sources):
     #     sources = list(sources)
     #     for i in sources:
