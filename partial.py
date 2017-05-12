@@ -406,6 +406,22 @@ class Partial(object):
 
     always = const = lambda self, val, *rest: lambda *args: val
 
+    def isEqual(self, obj1, obj2=None):
+        if obj2 is None:
+            return self.partial(self.isEqual, _, obj1)
+        return obj1 == obj2
+
+    def isEmpty(self, obj=None):
+        if obj is None:
+            return True
+        elif obj == "":
+            return True
+        elif len(obj) == 0:
+            return True
+        return False
+
+
+
     def is_func(self, val):
         return isinstance(val, types.FunctionType) or callable(val)
     isFunction = is_function = is_func
@@ -440,6 +456,18 @@ class Partial(object):
 
     def is_mr(self, val):
         return self.is_dict(val) and val.get('_mr')
+
+    def isType(self, obj):
+        return type(obj) is type
+
+    def isBoolean(self, obj):
+        return type(obj) is bool
+
+    def isInt(self, obj):
+        return type(obj) is int
+
+    def isString(self, obj):
+        return type(obj) is str
 
     def mr(self, *args):
         return {'value': args, '_mr': True}
@@ -482,7 +510,10 @@ class Partial(object):
 
     def val(self, obj, *keys):
         if len(keys) is 1:
-            neww = obj[keys[0]]
+            try:
+                neww = obj[keys[0]]
+            except:
+                neww = []
         else:
             neww = []
             for key in keys:
@@ -506,12 +537,18 @@ class Partial(object):
             res[key] = iteratee(float(obj[key]), key, obj)
         return res
 
+    # def pairs(self, obj):
+    #     res = []
+    #     for val in obj.items():
+    #         res.append(list(val))
+    #     return res
+
     def pairs(self, obj):
-        # res = []
-        # for key in obj.keys():
-        #     res.append([key, obj[key]])
-        # return res
-        return obj.items()
+        res = []
+        for key in obj:
+            res.append([key, obj[key]])
+        return res
+
 
     def invert(self, obj):
         res = {}
@@ -534,15 +571,11 @@ class Partial(object):
             dest.update(i)
         return dest
 
-    def defaults(self, dest, sources):
+    def defaults(self, dest, *sources):
+        sources = self.extend({}, *sources)
         for key in sources:
-            dest.setdefault(key, sources[key])
+            dest.setdefault(key , sources[key])
         return dest
-
-    def is_equal(self, obj1, obj2=None):
-        if obj2 is None:
-            return self.partial(self.is_equal, _, obj1)
-        return obj1 is obj2
 
     def pick(self, obj, *keys):
         if len(keys) is 0:
@@ -553,7 +586,8 @@ class Partial(object):
                 if keys[0](obj[key], key, obj):
                     res[key] = obj[key]
         else:
-            for key in keys:
+            flat = _.flatten(keys)
+            for key in flat:
                 res[key] = obj[key]
         return res
 
@@ -566,24 +600,33 @@ class Partial(object):
                 if keys[0](obj[key], key, obj):
                     del res[key]
         else:
-            for key in keys:
+            flat = _.flatten(keys)
+            for key in flat:
                 if res[key]:
                     del res[key]
         return res
 
     def clone(self, obj):
-        return obj.copy()
+        import copy
+        return copy.copy(obj)
 
-    # def defaults(self, dest, *sources):
-    #     sources = list(sources)
-    #     for i in sources:
-    #         dest.update(i)
-    #     return dest
+    def val2(self, obj, key):
+        try:
+            return obj[key]
+        except:
+            return ""
 
-    # def extend(self, dest, sources):
-    #     for key in sources.keys():
-    #         dest[key] = sources[key]
-    #     return dest
+    def matcher(self, obj, *attrs):
+        if len(attrs) is 0 :
+            return self.partial(self.matcher, _, obj)
+        def is_match(obj):
+            attr = attrs[0]
+            keys = self.keys(attr)
+            for key in keys:
+                if attr[key] != self.val2(obj, key) or key not in obj:
+                    return 0
+            return 1
+        return is_match(obj)
 
 
 _ = Partial()

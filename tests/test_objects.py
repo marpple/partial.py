@@ -1,7 +1,7 @@
 import unittest
 from unittesthelper import init
 init()  # will let you import modules from upper folder
-from src.underscore import _
+from partial import _, __, ___
 
 
 class TestObjects(unittest.TestCase):
@@ -40,13 +40,13 @@ class TestObjects(unittest.TestCase):
 
     def test_pick(self):
         result = _.pick({"a": 1, "b": 2, "c": 3}, 'a', 'c')
-        self.assertTrue(_.isEqual(result, {'a': 1, 'c': 3}),
+        self.assertTrue(_.is_equal(result, {'a': 1, 'c': 3}),
                         'can restrict properties to those named')
         result = _.pick({"a": 1, "b": 2, "c": 3}, ['b', 'c'])
-        self.assertTrue(_.isEqual(result, {"b": 2, "c": 3}),
+        self.assertTrue(_.is_equal(result, {"b": 2, "c": 3}),
                         'can restrict properties to those named in an array')
         result = _.pick({"a": 1, "b": 2, "c": 3}, ['a'], 'b')
-        self.assertTrue(_.isEqual(result, {"a": 1, "b": 2}),
+        self.assertTrue(_.is_equal(result, {"a": 1, "b": 2}),
                         'can restrict properties to those named in mixed args')
 
     def test_omit(self):
@@ -68,9 +68,9 @@ class TestObjects(unittest.TestCase):
         self.assertEqual(options["zero"], 0, 'value exists')
         self.assertEqual(options["one"], 1, 'value exists')
         self.assertEqual(options["twenty"], 20, 'default applied')
-
+        #
         _.defaults(options, {"empty": "full"},
-                   {"nan": "none"}, {"word": "word"}, {"word": "dog"})
+                   {"nan": "none"}, {"word": "word"})
         self.assertEqual(options["empty"], "", 'value exists')
         self.assertTrue(_.isNone(options["nan"]), "NaN isn't overridden")
         self.assertEqual(options["word"], "word",
@@ -116,7 +116,7 @@ class TestObjects(unittest.TestCase):
         self.assertTrue(_.isEqual(obj, "string"), "Object is equal")
 
     def test_isEmpty(self):
-        self.assertTrue(not _([1]).isEmpty(), '[1] is not empty')
+        self.assertTrue(not _.isEmpty([1]), '[1] is not empty')
         self.assertTrue(_.isEmpty([]), '[] is empty')
         self.assertTrue(not _.isEmpty({"one": 1}), '{one : 1} is not empty')
         self.assertTrue(_.isEmpty({}), '{} is empty')
@@ -124,7 +124,7 @@ class TestObjects(unittest.TestCase):
         self.assertTrue(_.isEmpty(), 'undefined is empty')
         self.assertTrue(_.isEmpty(''), 'the empty string is empty')
         self.assertTrue(not _.isEmpty('moe'), 'but other strings are not')
-
+        #
         obj = {"one": 1}
         obj.pop("one")
         self.assertTrue(_.isEmpty(obj),
@@ -172,10 +172,10 @@ class TestObjects(unittest.TestCase):
         moe = {"name": 'Moe Howard', "hair": True}
         curly = {"name": 'Curly Howard', "hair": False}
         stooges = [moe, curly]
-        self.assertTrue(_.find(stooges, _.matches({"hair": False})) == curly,
+        self.assertTrue(_.find(stooges, _.matcher({"hair": False})) == curly,
                         "returns a predicate that can"
                         " be used by finding functions.")
-        self.assertTrue(_.find(stooges, _.matches(moe)) == moe,
+        self.assertTrue(_.find(stooges, _.matcher(moe)) == moe,
                         "can be used to locate an object"
                         " exists in a collection.")
 
