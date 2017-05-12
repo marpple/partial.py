@@ -361,6 +361,22 @@ class Partial(object):
 
     always = const = lambda self, val, *rest: lambda *args: val
 
+    def isEqual(self, obj1, obj2=None):
+        if obj2 is None:
+            return self.partial(self.isEqual, _, obj1)
+        return obj1 == obj2
+
+    def isEmpty(self, obj=None):
+        if obj is None:
+            return True
+        elif obj == "":
+            return True
+        elif len(obj) == 0:
+            return True
+        return False
+
+
+
     def is_func(self, val):
         return isinstance(val, types.FunctionType) or callable(val)
     isFunction = is_function = is_func
@@ -387,6 +403,18 @@ class Partial(object):
 
     def is_mr(self, val):
         return self.is_dict(val) and val.get('_mr')
+
+    def isType(self, obj):
+        return type(obj) is type
+
+    def isBoolean(self, obj):
+        return type(obj) is bool
+
+    def isInt(self, obj):
+        return type(obj) is int
+
+    def isString(self, obj):
+        return type(obj) is str
 
     def mr(self, *args):
         return {'value': args, '_mr': True}
@@ -456,10 +484,16 @@ class Partial(object):
             res[key] = iteratee(float(obj[key]), key, obj)
         return res
 
+    # def pairs(self, obj):
+    #     res = []
+    #     for val in obj.items():
+    #         res.append(list(val))
+    #     return res
+
     def pairs(self, obj):
         res = []
-        for val in obj.items():
-            res.append(list(val))
+        for key in obj:
+            res.append([key, obj[key]])
         return res
 
 
@@ -489,20 +523,6 @@ class Partial(object):
         for key in sources:
             dest.setdefault(key , sources[key])
         return dest
-
-    def isEqual(self, obj1, obj2=None):
-        if obj2 is None:
-            return self.partial(self.isEqual, _, obj1)
-        return obj1 == obj2
-
-    def isEmpty(self, obj=None):
-        if obj is None:
-            return True
-        elif obj == "":
-            return True
-        elif len(obj) == 0:
-            return True
-        return False
 
     def pick(self, obj, *keys):
         if len(keys) is 0:
