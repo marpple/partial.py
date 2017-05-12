@@ -105,42 +105,44 @@ class TestCollections(unittest.TestCase):
     def test_max(self):
         res = _.max([5, 10, 15, 4, 8])
         self.assertEqual(15, res, "max did not work")
-    #
-    # def test_sortBy(self):
-    #     res = _([{'age': '59', 'name': 'foo'},
-    #              {'age': '39', 'name': 'bar'},
-    #              {'age': '49', 'name': 'baz'}]).sortBy('age')
-    #     self.assertEqual([{'age': '39', 'name': 'bar'},
-    #                       {'age': '49', 'name': 'baz'},
-    #                       {'age': '59', 'name': 'foo'}], res,
-    #                      "filter by key did not work")
-    #
-    #     res = _([{'age': '59', 'name': 'foo'},
-    #              {'age': '39', 'name': 'bar'},
-    #              {'age': '49', 'name': 'baz'}]).sortBy(lambda x: x['age'])
-    #     self.assertEqual(
-    #         [{'age': '39', 'name': 'bar'}, {'age': '49', 'name': 'baz'},
-    #          {'age': '59', 'name': 'foo'}], res,
-    #         "filter by lambda did not work")
-    #
-    #     res = _([50, 78, 30, 15, 90]).sortBy()
-    #     self.assertEqual([15, 30, 50, 78, 90], res, "filter list did not work")
-    #
-    # def test_groupby(self):
-    #     parity = _.groupBy([1, 2, 3, 4, 5, 6], lambda num, *args: num % 2)
-    #     self.assertTrue(0 in parity and 1 in parity,
-    #                     'created a group for each value')
-    #     self.assertEqual(_(parity[0]).join(', '), '2, 4, 6',
-    #                      'put each even number in the right group')
-    #
-    #     self.assertEqual(_.groupBy([1], lambda num, *args: num), [1])
-    #
-    #     llist = ["one", "two", "three", "four", "five",
-    #              "six", "seven", "eight", "nine", "ten"]
-    #     grouped = _.groupBy(llist, lambda x, *args: len(x))
-    #     self.assertEqual(_(grouped[3]).join(' '), 'one two six ten')
-    #     self.assertEqual(_(grouped[4]).join(' '), 'four five nine')
-    #     self.assertEqual(_(grouped[5]).join(' '), 'three seven eight')
+
+    def test_sortBy(self):
+        res = _.sortBy(
+                [{'age': '59', 'name': 'foo'},
+                 {'age': '39', 'name': 'bar'},
+                 {'age': '49', 'name': 'baz'}], 'age')
+        self.assertEqual([{'age': '39', 'name': 'bar'},
+                          {'age': '49', 'name': 'baz'},
+                          {'age': '59', 'name': 'foo'}], res,
+                         "filter by key did not work")
+
+        res = _.sortBy(
+            [{'age': '59', 'name': 'foo'},
+                 {'age': '39', 'name': 'bar'},
+                 {'age': '49', 'name': 'baz'}], lambda x: x['age'])
+        self.assertEqual(
+            [{'age': '39', 'name': 'bar'}, {'age': '49', 'name': 'baz'},
+             {'age': '59', 'name': 'foo'}], res,
+            "filter by lambda did not work")
+
+        res = _.sortBy([50, 78, 30, 15, 90])
+        self.assertEqual([15, 30, 50, 78, 90], res, "filter list did not work")
+
+    def test_groupby(self):
+        parity = _.groupBy([1, 2, 3, 4, 5, 6], lambda num, *args: num % 2)
+        self.assertTrue(0 in parity and 1 in parity,
+                        'created a group for each value')
+        self.assertEqual(str(parity[0]), '[2, 4, 6]',
+                         'put each even number in the right group')
+
+        self.assertEqual(_.groupBy([1], lambda num, *args: num)[1], [1])
+
+        llist = ["one", "two", "three", "four", "five",
+                 "six", "seven", "eight", "nine", "ten"]
+        grouped = _.groupBy(llist, lambda x, *args: len(x))
+        self.assertEqual(grouped[3], ["one", "two", "six", "ten"])
+        self.assertEqual(grouped[4], ["four", "five", "nine"])
+        self.assertEqual(grouped[5], ["three", "seven", "eight"])
     #
     # def test_countby(self):
     #     parity = _.countBy([1, 2, 3, 4, 5], lambda num, *args: num % 2 == 0)

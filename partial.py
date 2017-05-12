@@ -218,10 +218,26 @@ class Partial(object):
                     tmp, res = (cmp, data[k])
         return res
 
-    # def sortBy(self, data, iteratee):
+    def sort_by(self, data, iteratee=lambda x, *r: x):
+        if self.is_func(data) or type(data) is str:
+            self.partial(self.sort_by, _, data)
+        res, iter = (list(data), iteratee if self.is_func(iteratee) else lambda o: o[iteratee])
+        res.sort(key=iter)
+        return res
+    sortBy = sort_by
 
-    # def groupBy(self, data, iteratee):
-
+    def group_by(self, data, iteratee=lambda x, *r: x):
+        if self.is_func(data) or type(data) is str:
+            self.partial(self.group_by, _, data)
+        iter = iteratee if self.is_func(iteratee) else lambda o: o[iteratee]
+        res, arr = ({}, self.map(data, iter))
+        for i, v in enumerate(arr):
+            if self.has(res, v):
+                res[v].append(data[i])
+            else:
+                res[v] = [data[i]]
+        return res
+    groupBy = group_by
     # def indexBy(self, data, iteratee):
 
     # def countBy(self, data, iteratee):
@@ -557,9 +573,9 @@ class Partial(object):
         for key in keys:
             try:
                 if obj[key]:
-                   res = 'true'
+                   res = True
             except:
-                return 'false'
+                return False
         return res
 
     def extend(self, dest, *sources):
