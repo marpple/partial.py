@@ -238,9 +238,29 @@ class Partial(object):
                 res[v] = [data[i]]
         return res
     groupBy = group_by
-    # def indexBy(self, data, iteratee):
 
-    # def countBy(self, data, iteratee):
+    def index_by(self, data, iteratee=lambda x, *r: x):
+        if self.is_func(data) or type(data) is str:
+            self.partial(self.index_by, _, data)
+        iter = iteratee if self.is_func(iteratee) else lambda o: o[iteratee]
+        res, arr = ({}, self.map(data, iter))
+        for i, v in enumerate(arr):
+            res[v] = data[i]
+        return res
+    indexBy = index_by
+
+    def count_by(self, data, iteratee=lambda x, *r: x):
+        if self.is_func(data) or type(data) is str:
+            self.partial(self.count_by, _, data)
+        iter = iteratee if self.is_func(iteratee) else lambda o: o[iteratee]
+        res, arr = ({}, self.map(data, iter))
+        for i, v in enumerate(arr):
+            try:
+                res[v] += 1
+            except:
+                res[v] = 1
+        return res
+    countBy = count_by
 
     # def shuffle(self, data):
 

@@ -143,20 +143,20 @@ class TestCollections(unittest.TestCase):
         self.assertEqual(grouped[3], ["one", "two", "six", "ten"])
         self.assertEqual(grouped[4], ["four", "five", "nine"])
         self.assertEqual(grouped[5], ["three", "seven", "eight"])
-    #
-    # def test_countby(self):
-    #     parity = _.countBy([1, 2, 3, 4, 5], lambda num, *args: num % 2 == 0)
-    #     self.assertEqual(parity[True], 2)
-    #     self.assertEqual(parity[False], 3)
-    #
-    #     self.assertEqual(_.countBy([1], lambda num, *args: num), 1)
-    #
-    #     llist = ["one", "two", "three", "four", "five",
-    #              "six", "seven", "eight", "nine", "ten"]
-    #     grouped = _.countBy(llist, lambda x, *args: len(x))
-    #     self.assertEqual(grouped[3], 4)
-    #     self.assertEqual(grouped[4], 3)
-    #     self.assertEqual(grouped[5], 3)
+
+    def test_countby(self):
+        parity = _.countBy([1, 2, 3, 4, 5], lambda num, *args: num % 2 == 0)
+        self.assertEqual(parity[True], 2)
+        self.assertEqual(parity[False], 3)
+
+        self.assertEqual(_.countBy([1], lambda num, *args: num)[1], 1)
+
+        llist = ["one", "two", "three", "four", "five",
+                 "six", "seven", "eight", "nine", "ten"]
+        grouped = _.countBy(llist, lambda x, *args: len(x))
+        self.assertEqual(grouped[3], 4)
+        self.assertEqual(grouped[4], 3)
+        self.assertEqual(grouped[5], 3)
     #
     # def test_shuffle(self):
     #     res = _([5, 10, 15, 4, 8]).shuffle()
@@ -199,25 +199,25 @@ class TestCollections(unittest.TestCase):
     #     result = _.findWhere([], {"c": 1})
     #     self.assertEqual(result, None)
     #
-    # def test_indexBy(self):
-    #     parity = _.indexBy([1, 2, 3, 4, 5], lambda num, *args: num % 2 == 0)
-    #     self.assertEqual(parity[True], 4)
-    #     self.assertEqual(parity[False], 5)
-    #
-    #     self.assertEqual(_.indexBy([1], lambda num, *args: num), 1)
-    #
-    #     llist = ["one", "two", "three", "four", "five",
-    #              "six", "seven", "eight", "nine", "ten"]
-    #     grouped = _.indexBy(llist, lambda x, *args: len(x))
-    #     self.assertEqual(grouped[3], 'ten')
-    #     self.assertEqual(grouped[4], 'nine')
-    #     self.assertEqual(grouped[5], 'eight')
-    #
-    #     array = [1, 2, 1, 2, 3]
-    #     grouped = _.indexBy(array)
-    #     self.assertEqual(grouped[1], 1)
-    #     self.assertEqual(grouped[2], 2)
-    #     self.assertEqual(grouped[3], 3)
+    def test_indexBy(self):
+        parity = _.indexBy([1, 2, 3, 4, 5], lambda num, *args: num % 2 == 0)
+        self.assertEqual(parity[True], 4)
+        self.assertEqual(parity[False], 5)
+
+        self.assertEqual(_.indexBy([1], lambda num, *args: num)[1], 1)
+
+        llist = ["one", "two", "three", "four", "five",
+                 "six", "seven", "eight", "nine", "ten"]
+        grouped = _.indexBy(llist, lambda x, *args: len(x))
+        self.assertEqual(grouped[3], 'ten')
+        self.assertEqual(grouped[4], 'nine')
+        self.assertEqual(grouped[5], 'eight')
+
+        array = [1, 2, 1, 2, 3]
+        grouped = _.indexBy(array)
+        self.assertEqual(grouped[1], 1)
+        self.assertEqual(grouped[2], 2)
+        self.assertEqual(grouped[3], 3)
     #
     # def test_partition(self):
     #
