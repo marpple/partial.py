@@ -134,28 +134,28 @@ class TestArrays(unittest.TestCase):
         num = 35
         index = _.indexOf(numbers, num, True)
         self.assertEqual(index, -1, '35 is not in the list')
-        #
-        # numbers = [10, 20, 30, 40, 50]
-        # num = 40
-        # index = _.indexOf(numbers, num, True)
-        # self.assertEqual(index, 3, '40 is in the list')
-        #
-        # numbers = [1, 40, 40, 40, 40, 40, 40, 40, 50, 60, 70]
-        # num = 40
-        # index = _.indexOf(numbers, num, True)
-        # self.assertEqual(index, 1, '40 is in the list')
+
+        numbers = [10, 20, 30, 40, 50]
+        num = 40
+        index = _.indexOf(numbers, num, True)
+        self.assertEqual(index, 3, '40 is in the list')
+
+        numbers = [1, 40, 40, 40, 40, 40, 40, 40, 50, 60, 70]
+        num = 40
+        index = _.indexOf(numbers, num, True)
+        self.assertEqual(index, 1, '40 is in the list')
 
     def test_lastIndexOf(self):
         numbers = [2, 1, 0, 1, 0, 0, 1, 0, 0, 0]
         self.assertEqual(_.lastIndexOf(numbers, 1), 6,
                          'can compute lastIndexOf, '
                          'even without the native function')
-    #     self.assertEqual(_.lastIndexOf(numbers, 0), 9,
-    #                      'lastIndexOf the other element')
-    #     self.assertEqual(_.lastIndexOf(numbers, 2), 0,
-    #                      'lastIndexOf the other element')
-    #     self.assertEqual(_.indexOf(None, 2), -1, 'handles nulls properly')
-    #
+        self.assertEqual(_.lastIndexOf(numbers, 0), 9,
+                         'lastIndexOf the other element')
+        self.assertEqual(_.lastIndexOf(numbers, 2), 0,
+                         'lastIndexOf the other element')
+        self.assertEqual(_.indexOf(None, 2), -1, 'handles nulls properly')
+
     def test_range(self):
         self.assertEqual(
             list(_.range(0)), [], 'range with 0 as a first argument'

@@ -3,18 +3,8 @@
 # Maintainers - Jeongik Park, Joeun Ha
 # (c) 2017 Marpple. MIT Licensed.
 import types
+
 ___ = {}
-
-
-def createIndexFinder(dir, predicateFind, sortedIndex):
-    def _func(arr, item, idx):
-        i, length = (0, len(arr))
-        if isinstance(idx, int):
-            if dir > 0:
-                i = idx if idx >= 0 else max(idx + length, i)
-            else:
-                length = min(idx + 1, length) if idx >= 0 else idx + length + 1
-    return _func
 
 
 class Partial(object):
@@ -148,7 +138,7 @@ class Partial(object):
             return self.partial(self.reject, _, data)
         return self.filter(data, self.negate(predicate))
 
-    def every(self, data, predicate=lambda x: x):
+    def every(self, data, predicate=lambda x, *r: x):
         if predicate is None and self.is_func(data):
             return self.partial(self.every, _, data)
         if type(data) is list or type(data) is tuple:
@@ -161,7 +151,7 @@ class Partial(object):
                     return False
         return True
 
-    def some(self, data, predicate=lambda x: x):
+    def some(self, data, predicate=lambda x, *r: x):
         if predicate is None and self.is_func(data):
             return self.partial(self.every, _, data)
         if type(data) is list or type(data) is tuple:
@@ -192,7 +182,7 @@ class Partial(object):
             return d[key]
         return self.map(data, iter)
 
-    def max(self, data, iteratee=lambda x: x):
+    def max(self, data, iteratee=lambda x, *r: x):
         if iteratee is None and self.is_func(data):
             return self.partial(self.max, _, data)
         if self.is_list_or_tuple(data):
@@ -210,7 +200,7 @@ class Partial(object):
                     tmp, res = (cmp, data[k])
         return res
 
-    def min(self, data, iteratee=lambda x: x):
+    def min(self, data, iteratee=lambda x, *r: x):
         if iteratee is None and self.is_func(data):
             return self.partial(self.min, _, data)
         if self.is_list_or_tuple(data):
@@ -269,7 +259,7 @@ class Partial(object):
     tail = drop = rest
 
     def compact(self, arr):
-        return self.filter(arr, lambda x: x)
+        return self.filter(arr, lambda x, *r: x)
 
     def flatten(self, arr, shallow=False):
         res = []
@@ -383,19 +373,23 @@ class Partial(object):
         return -1
     findLastIndex = find_last_index = find_last_i
 
-    def index_of(self, arr, value, idx=0):
+    def index_of(self, arr, item, idx=0):
         if self.is_list_or_tuple(arr):
-            if isinstance(idx, int):
-                for i in range(idx, len(arr)):
-                    if arr[i] == value:
-                        return i
+            if idx is bool and idx:
+                idx = self.sorted_i(arr, item)
+                return idx if arr[idx] is item else -1
+            for i in range(idx, len(arr)):
+                if arr[i] is item:
+                    return i
         return -1
     indexOf = index_of
 
-    def last_index_of(self, arr, value):
+    def last_index_of(self, arr, item, idx=0):
         if self.is_list_or_tuple(arr):
+            if idx is bool and idx:
+                return self.find_last_i(arr, lambda x, *r: x is item)
             for i in range(len(arr)-1, -1, -1):
-                if arr[i] == value:
+                if arr[i] is item:
                     return i
         return -1
     lastIndexOf = last_index_of
@@ -590,6 +584,7 @@ class Partial(object):
     #     for key in sources.keys():
     #         dest[key] = sources[key]
     #     return dest
+
 
 _ = Partial()
 __ = _.pipe
