@@ -406,6 +406,7 @@ class Partial(object):
 
     always = const = lambda self, val, *rest: lambda *args: val
 
+    # Objects
     def isEqual(self, obj1, obj2=None):
         if obj2 is None:
             return self.partial(self.isEqual, _, obj1)
@@ -419,8 +420,6 @@ class Partial(object):
         elif len(obj) == 0:
             return True
         return False
-
-
 
     def is_func(self, val):
         return isinstance(val, types.FunctionType) or callable(val)
@@ -497,7 +496,6 @@ class Partial(object):
     def negate(self, predicate):
         return lambda *args: not predicate(*args)
 
-    # Objects
     def keys(self, obj):
         if type(obj) is not dict:
             return []
@@ -548,7 +546,6 @@ class Partial(object):
         for key in obj:
             res.append([key, obj[key]])
         return res
-
 
     def invert(self, obj):
         res = {}
