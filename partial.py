@@ -429,7 +429,10 @@ class Partial(object):
 
     def val(self, obj, *keys):
         if len(keys) is 1:
-            neww = obj[keys[0]]
+            try:
+                neww = obj[keys[0]]
+            except:
+                neww = []
         else:
             neww = []
             for key in keys:
@@ -454,11 +457,11 @@ class Partial(object):
         return res
 
     def pairs(self, obj):
-        # res = []
-        # for key in obj.keys():
-        #     res.append([key, obj[key]])
-        # return res
-        return obj.items()
+        res = []
+        for val in obj.items():
+            res.append(list(val))
+        return res
+
 
     def invert(self, obj):
         res = {}
@@ -481,15 +484,25 @@ class Partial(object):
             dest.update(i)
         return dest
 
-    def defaults(self, dest, sources):
+    def defaults(self, dest, *sources):
+        sources = self.extend({}, *sources)
         for key in sources:
-            dest.setdefault(key, sources[key])
+            dest.setdefault(key , sources[key])
         return dest
 
-    def is_equal(self, obj1, obj2=None):
+    def isEqual(self, obj1, obj2=None):
         if obj2 is None:
-            return self.partial(self.is_equal, _, obj1)
-        return obj1 is obj2
+            return self.partial(self.isEqual, _, obj1)
+        return obj1 == obj2
+
+    def isEmpty(self, obj=None):
+        if obj is None:
+            return True
+        elif obj == "":
+            return True
+        elif len(obj) == 0:
+            return True
+        return False
 
     def pick(self, obj, *keys):
         if len(keys) is 0:
@@ -500,7 +513,8 @@ class Partial(object):
                 if keys[0](obj[key], key, obj):
                     res[key] = obj[key]
         else:
-            for key in keys:
+            flat = _.flatten(keys)
+            for key in flat:
                 res[key] = obj[key]
         return res
 
@@ -513,50 +527,33 @@ class Partial(object):
                 if keys[0](obj[key], key, obj):
                     del res[key]
         else:
-            for key in keys:
+            flat = _.flatten(keys)
+            for key in flat:
                 if res[key]:
                     del res[key]
         return res
 
     def clone(self, obj):
-        return obj.copy()
+        import copy
+        return copy.copy(obj)
 
-#     function
-#     f(object, attrs)
-#     {
-#     if (arguments.length == 1)
-#     return _(f, _, object);
-#     var
-#     keys = _.keys(attrs), length = keys.length;
-#     if (object == null) return !length;
-#     for (var i = 0, obj = Object(object), key; i < length; i++)
-#     if (attrs[key = keys[i]] != obj[key] | | !(key in obj)) return false;
-#
-#
-# return true;
-# };
-    def matcher(self, obj, attrs=None):
-        if attrs is None : return self.partial(self.matcher, _, obj)
+    def val2(self, obj, key):
+        try:
+            return obj[key]
+        except:
+            return ""
 
-        keys = self.keys(attrs)
-
-        for key in keys:
-            if attrs[key] != obj[key]:
-                return 'false'
-        return 'true'
-
-        # return lambda v, i, li: v == obj
-
-    # def defaults(self, dest, *sources):
-    #     sources = list(sources)
-    #     for i in sources:
-    #         dest.update(i)
-    #     return dest
-
-    # def extend(self, dest, sources):
-    #     for key in sources.keys():
-    #         dest[key] = sources[key]
-    #     return dest
+    def matcher(self, obj, *attrs):
+        if len(attrs) is 0 :
+            return self.partial(self.matcher, _, obj)
+        def is_match(obj):
+            attr = attrs[0]
+            keys = self.keys(attr)
+            for key in keys:
+                if attr[key] != self.val2(obj, key) or key not in obj:
+                    return 0
+            return 1
+        return is_match(obj)
 
 _ = Partial()
 __ = _.pipe
