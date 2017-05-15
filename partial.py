@@ -4,6 +4,7 @@
 # (c) 2017 Marpple. MIT Licensed.
 import types
 from threading import Timer
+import time
 
 ___ = {}
 
@@ -724,6 +725,76 @@ class Partial(object):
     def defer(self, func, *args):
         return self.delay(func, 1, *args)
 
+    def retrn(self, func, args):
+        if len(args) == 0:
+            return func()
+        return func(*args)
+
+    def throttle(self, func, wait):
+        previous = 0
+        timeout = False
+
+        def throttled(*args):
+            nonlocal previous, timeout
+            result = going = None
+
+            def later():
+                nonlocal timeout, result
+                timeout = False
+                result = self.retrn(func, args)
+
+            now = time.time()
+            remaining = wait - (now - previous)
+            if remaining <= 0:
+                if timeout is True:
+                    going.cancel()
+                    timeout = False
+                previous = now
+                result = self.retrn(func, args)
+            elif timeout is False:
+                timeout = True
+                going = Timer(remaining, later)
+                going.start()
+            return result
+
+        return throttled
+
+    def debounce(self, func, wait):
+        wait = float(wait)/float(1000)
+
+        def debounced(*args):
+            def call_it():
+                return self.retrn(func, args)
+            try:
+                debounced.t.cancel()
+            except(AttributeError):
+                pass
+            debounced.t = Timer(wait, call_it)
+            debounced.t.start()
+
+        return debounced
+
+    def after(self, times, func):
+        def aftered(*args):
+            nonlocal times
+            times -=1
+            if times < 1:
+                self.retrn(func, args)
+        return aftered
+
+    def before(self, times, func):
+        memo = None
+        def befored(*args):
+            nonlocal times, memo
+            times -=1
+            if times < 0:
+                return memo
+            memo = self.retrn(func, args)
+            return memo
+        return befored
+
+    def once(self, func):
+        return self.before(1, func)
 
 _ = Partial()
 __ = _.pipe
