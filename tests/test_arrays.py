@@ -105,45 +105,57 @@ class TestArrays(unittest.TestCase):
                          " ['curly', 50, None]]", str(
                              stooges), 'zipped together arrays of different lengths')
 
-    # def test_object(self):
-    #     result = _.object(['moe', 'larry', 'curly'], [30, 40, 50])
-    #     shouldBe = {"moe": 30, "larry": 40, "curly": 50}
-    #     self.assertEqual(result, shouldBe,
-    #                      "two arrays zipped together into an object")
-    #
-    # def test_indexOf(self):
-    #     numbers = [1, 2, 3]
-    #     self.assertEqual(_.indexOf(numbers, 2), 1,
-    #                      'can compute indexOf, even '
-    #                      'without the native function')
-    #     self.assertEqual(_.indexOf(None, 2), -1, 'handles nulls properly')
-    #
-    #     numbers = [10, 20, 30, 40, 50]
-    #     num = 35
-    #     index = _.indexOf(numbers, num, True)
-    #     self.assertEqual(index, -1, '35 is not in the list')
-    #
-    #     numbers = [10, 20, 30, 40, 50]
-    #     num = 40
-    #     index = _.indexOf(numbers, num, True)
-    #     self.assertEqual(index, 3, '40 is in the list')
-    #
-    #     numbers = [1, 40, 40, 40, 40, 40, 40, 40, 50, 60, 70]
-    #     num = 40
-    #     index = _.indexOf(numbers, num, True)
-    #     self.assertEqual(index, 1, '40 is in the list')
-    #
-    # def test_lastIndexOf(self):
-    #     numbers = [2, 1, 0, 1, 0, 0, 1, 0, 0, 0]
-    #     self.assertEqual(_.lastIndexOf(numbers, 1), 6,
-    #                      'can compute lastIndexOf, '
-    #                      'even without the native function')
-    #     self.assertEqual(_.lastIndexOf(numbers, 0), 9,
-    #                      'lastIndexOf the other element')
-    #     self.assertEqual(_.lastIndexOf(numbers, 2), 0,
-    #                      'lastIndexOf the other element')
-    #     self.assertEqual(_.indexOf(None, 2), -1, 'handles nulls properly')
-    #
+    def test_object(self):
+        result = _.object(['moe', 'larry', 'curly'], [30, 40, 50])
+        shouldBe = {"moe": 30, "larry": 40, "curly": 50}
+        self.assertEqual(result, shouldBe,
+                         "two arrays zipped together into an object")
+        result = _.object([['moe', 30], ['larry', 40], ['curly', 50]])
+        self.assertEqual(result, shouldBe,
+                         "two arrays zipped together into an object")
+
+    def test_sortedindex(self):
+        numbers = [10, 20, 30, 40, 50]
+        num = 35
+        indexForNum = _.sortedIndex(numbers, num)
+        self.assertEqual(3, indexForNum, '35 should be inserted at index 3')
+
+        indexFor30 = _.sortedIndex(numbers, 30)
+        self.assertEqual(2, indexFor30, '30 should be inserted at index 2')
+
+    def test_indexOf(self):
+        numbers = [1, 2, 3]
+        self.assertEqual(_.indexOf(numbers, 2), 1,
+                         'can compute indexOf, even '
+                         'without the native function')
+        self.assertEqual(_.indexOf(None, 2), -1, 'handles nulls properly')
+
+        numbers = [10, 20, 30, 40, 50]
+        num = 35
+        index = _.indexOf(numbers, num, True)
+        self.assertEqual(index, -1, '35 is not in the list')
+
+        numbers = [10, 20, 30, 40, 50]
+        num = 40
+        index = _.indexOf(numbers, num, True)
+        self.assertEqual(index, 3, '40 is in the list')
+
+        numbers = [1, 40, 40, 40, 40, 40, 40, 40, 50, 60, 70]
+        num = 40
+        index = _.indexOf(numbers, num, True)
+        self.assertEqual(index, 1, '40 is in the list')
+
+    def test_lastIndexOf(self):
+        numbers = [2, 1, 0, 1, 0, 0, 1, 0, 0, 0]
+        self.assertEqual(_.lastIndexOf(numbers, 1), 6,
+                         'can compute lastIndexOf, '
+                         'even without the native function')
+        self.assertEqual(_.lastIndexOf(numbers, 0), 9,
+                         'lastIndexOf the other element')
+        self.assertEqual(_.lastIndexOf(numbers, 2), 0,
+                         'lastIndexOf the other element')
+        self.assertEqual(_.indexOf(None, 2), -1, 'handles nulls properly')
+
     def test_range(self):
         self.assertEqual(
             list(_.range(0)), [], 'range with 0 as a first argument'

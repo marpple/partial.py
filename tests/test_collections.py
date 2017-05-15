@@ -156,15 +156,6 @@ class TestCollections(unittest.TestCase):
     #     self.assertEqual(grouped[4], 3)
     #     self.assertEqual(grouped[5], 3)
     #
-    # def test_sortedindex(self):
-    #     numbers = [10, 20, 30, 40, 50]
-    #     num = 35
-    #     indexForNum = _.sortedIndex(numbers, num)
-    #     self.assertEqual(3, indexForNum, '35 should be inserted at index 3')
-    #
-    #     indexFor30 = _.sortedIndex(numbers, 30)
-    #     self.assertEqual(2, indexFor30, '30 should be inserted at index 2')
-    #
     # def test_shuffle(self):
     #     res = _([5, 10, 15, 4, 8]).shuffle()
     #     self.assertNotEqual([5, 10, 15, 4, 8], res,
