@@ -130,9 +130,16 @@ class Partial(object):
         return res
     select = filter
 
-    # def where(self, data, properties):
+    def where(self, data, attrs=None):
+        if attrs is None:
+            return self.filter(lambda o, *r: self.is_match(o, attrs))
+        return self.filter(data, lambda o, *r: self.is_match(o, attrs))
 
-    # def find_where(self, data, properties):
+    def find_where(self, data, attrs):
+        if attrs is None:
+            return self.find(lambda o, *r: self.is_match(o, attrs))
+        return self.find(data, lambda o, *r: self.is_match(o, attrs))
+    findWhere = find_where
 
     def reject(self, data, predicate=None):
         if predicate is None and self.is_func(data):
@@ -170,6 +177,16 @@ class Partial(object):
         data = list(data.values())[fromIndex:] if type(data) is dict else data[fromIndex:]
         return item in data
     includes = contains
+
+    def invoke(self, data, method, *args):
+        isFunc = self.is_func(method)
+
+        def iter(value, *r):
+            if isFunc:
+                return method(value, *args)
+            else:
+                return getattr(value, method)(*args)
+        return self.map(data, iter)
 
     def pluck(self, data, key=None):
         if key is None:
@@ -219,13 +236,49 @@ class Partial(object):
                     tmp, res = (cmp, data[k])
         return res
 
-    # def sortBy(self, data, iteratee):
+    def sort_by(self, data, iteratee=lambda x, *r: x):
+        if self.is_func(data) or type(data) is str:
+            self.partial(self.sort_by, _, data)
+        res, iter = (list(data), iteratee if self.is_func(iteratee) else lambda o: o[iteratee])
+        res.sort(key=iter)
+        return res
+    sortBy = sort_by
 
-    # def groupBy(self, data, iteratee):
+    def group_by(self, data, iteratee=lambda x, *r: x):
+        if self.is_func(data) or type(data) is str:
+            self.partial(self.group_by, _, data)
+        iter = iteratee if self.is_func(iteratee) else lambda o: o[iteratee]
+        res, arr = ({}, self.map(data, iter))
+        for i, v in enumerate(arr):
+            if self.has(res, v):
+                res[v].append(data[i])
+            else:
+                res[v] = [data[i]]
+        return res
+    groupBy = group_by
 
-    # def indexBy(self, data, iteratee):
+    def index_by(self, data, iteratee=lambda x, *r: x):
+        if self.is_func(data) or type(data) is str:
+            self.partial(self.index_by, _, data)
+        iter = iteratee if self.is_func(iteratee) else lambda o: o[iteratee]
+        res, arr = ({}, self.map(data, iter))
+        for i, v in enumerate(arr):
+            res[v] = data[i]
+        return res
+    indexBy = index_by
 
-    # def countBy(self, data, iteratee):
+    def count_by(self, data, iteratee=lambda x, *r: x):
+        if self.is_func(data) or type(data) is str:
+            self.partial(self.count_by, _, data)
+        iter = iteratee if self.is_func(iteratee) else lambda o: o[iteratee]
+        res, arr = ({}, self.map(data, iter))
+        for i, v in enumerate(arr):
+            try:
+                res[v] += 1
+            except:
+                res[v] = 1
+        return res
+    countBy = count_by
 
     # def shuffle(self, data):
 
@@ -233,7 +286,10 @@ class Partial(object):
 
     # def to_array(self, data):
 
-    # def size(self, data):
+    def size(self, data):
+        if data is None:
+            return 0
+        return len(data) if self.is_list_or_tuple(data) else len(data.keys())
 
     # def partition(self, data, predicate):
 
@@ -408,12 +464,13 @@ class Partial(object):
     always = const = lambda self, val, *rest: lambda *args: val
 
     # Objects
-    def isEqual(self, obj1, obj2=None):
+    def is_equal(self, obj1, obj2=None):
         if obj2 is None:
             return self.partial(self.isEqual, _, obj1)
         return obj1 == obj2
+    isEqual = is_equal
 
-    def isEmpty(self, obj=None):
+    def is_empty(self, obj=None):
         if obj is None:
             return True
         elif obj == "":
@@ -421,6 +478,7 @@ class Partial(object):
         elif len(obj) == 0:
             return True
         return False
+    isEmpty = is_empty
 
     def is_func(self, val):
         return isinstance(val, types.FunctionType) or callable(val)
@@ -456,18 +514,23 @@ class Partial(object):
 
     def is_mr(self, val):
         return self.is_dict(val) and val.get('_mr')
+    isMr = is_mr
 
-    def isType(self, obj):
+    def is_type(self, obj):
         return type(obj) is type
+    isType = is_type
 
-    def isBoolean(self, obj):
+    def is_boolean(self, obj):
         return type(obj) is bool
+    isBoolean = is_bool = is_boolean
 
-    def isInt(self, obj):
+    def is_int(self, obj):
         return type(obj) is int
+    isInt = is_int
 
-    def isString(self, obj):
+    def is_str(self, obj):
         return type(obj) is str
+    isString = is_string = is_str
 
     def mr(self, *args):
         return {'value': args, '_mr': True}
@@ -527,6 +590,7 @@ class Partial(object):
 
     def propertyOf(self, key):
         return self.partial(self.val, key, _)
+    property_of = propertyOf
 
     def mapObject(self, obj, iteratee=None):
         if iteratee is None and self.is_func(obj):
@@ -535,6 +599,7 @@ class Partial(object):
         for key in obj.keys():
             res[key] = iteratee(float(obj[key]), key, obj)
         return res
+    map_object = mapObject
 
     # def pairs(self, obj):
     #     res = []
@@ -617,6 +682,7 @@ class Partial(object):
     def matcher(self, obj, *attrs):
         if len(attrs) is 0 :
             return self.partial(self.matcher, _, obj)
+
         def is_match(obj):
             attr = attrs[0]
             keys = self.keys(attr)
@@ -625,8 +691,9 @@ class Partial(object):
                     return 0
             return 1
         return is_match(obj)
+    isMatch = is_match = matcher
 
-#     function
+    # Functions
     def memoize(self, func, hasher=None):
         if hasher is None:
             hasher = lambda x: x
