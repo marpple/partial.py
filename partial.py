@@ -655,7 +655,6 @@ class Partial(object):
         t.start()
 
     def defer(self, func, *args):
-        # _.defer = _.partial(_.delay, _, 1);
         return self.delay(func, 1, *args)
 
 
