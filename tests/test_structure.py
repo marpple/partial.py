@@ -1,7 +1,7 @@
 import unittest
 from unittesthelper import init
 init()  # will let you import modules from upper folder
-from src.underscore import _
+from partial import _, __, ___
 
 
 class TestStructure(unittest.TestCase):
