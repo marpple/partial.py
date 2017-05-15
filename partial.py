@@ -129,9 +129,16 @@ class Partial(object):
         return res
     select = filter
 
-    # def where(self, data, properties):
+    def where(self, data, attrs=None):
+        if attrs is None:
+            return self.filter(lambda o, *r: self.is_match(o, attrs))
+        return self.filter(data, lambda o, *r: self.is_match(o, attrs))
 
-    # def find_where(self, data, properties):
+    def find_where(self, data, attrs):
+        if attrs is None:
+            return self.find(lambda o, *r: self.is_match(o, attrs))
+        return self.find(data, lambda o, *r: self.is_match(o, attrs))
+    findWhere = find_where
 
     def reject(self, data, predicate=None):
         if predicate is None and self.is_func(data):
@@ -169,6 +176,16 @@ class Partial(object):
         data = list(data.values())[fromIndex:] if type(data) is dict else data[fromIndex:]
         return item in data
     includes = contains
+
+    def invoke(self, data, method, *args):
+        isFunc = self.is_func(method)
+
+        def iter(value, *r):
+            if isFunc:
+                return method(value, *args)
+            else:
+                return getattr(value, method)(*args)
+        return self.map(data, iter)
 
     def pluck(self, data, key=None):
         if key is None:
@@ -268,7 +285,10 @@ class Partial(object):
 
     # def to_array(self, data):
 
-    # def size(self, data):
+    def size(self, data):
+        if data is None:
+            return 0
+        return len(data) if self.is_list_or_tuple(data) else len(data.keys())
 
     # def partition(self, data, predicate):
 
@@ -494,15 +514,19 @@ class Partial(object):
 
     def isType(self, obj):
         return type(obj) is type
+    is_type = isType
 
     def isBoolean(self, obj):
         return type(obj) is bool
+    is_bool = isBool = isBoolean
 
     def isInt(self, obj):
         return type(obj) is int
+    is_int = isInt
 
     def isString(self, obj):
         return type(obj) is str
+    is_str = isStr = isString
 
     def mr(self, *args):
         return {'value': args, '_mr': True}
@@ -652,6 +676,7 @@ class Partial(object):
     def matcher(self, obj, *attrs):
         if len(attrs) is 0 :
             return self.partial(self.matcher, _, obj)
+
         def is_match(obj):
             attr = attrs[0]
             keys = self.keys(attr)
@@ -660,6 +685,7 @@ class Partial(object):
                     return 0
             return 1
         return is_match(obj)
+    isMatch = is_match = matcher
 
 
 _ = Partial()

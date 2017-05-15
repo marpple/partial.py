@@ -86,13 +86,13 @@ class TestCollections(unittest.TestCase):
         res = _.contains({"foo": "bar", "hello": "world"}, 'notin')
         self.assertFalse(res, "include was not false")
 
-    # def test_invoke(self):
-    #     res = _(["foo", "bar"]).invoke(lambda x, *args: x.upper())
-    #     self.assertEqual(["FOO", "BAR"], res,
-    #                      "invoke with lambda did not work")
-    #     res = _(["foo", "bar"]).invoke("upper")
-    #     self.assertEqual(["FOO", "BAR"], res, "invoke with name did not work")
-    #
+    def test_invoke(self):
+        res = _.invoke(["foo", "bar"], lambda x, *args: x.upper())
+        self.assertEqual(["FOO", "BAR"], res,
+                         "invoke with lambda did not work")
+        res = _.invoke(["foo", "bar"], "upper")
+        self.assertEqual(["FOO", "BAR"], res, "invoke with name did not work")
+
     def test_pluck(self):
         res = _.pluck([{"name": "foo", "age": "29"}, {"name": "bar", "age": "39"},
                 {"name": "baz", "age": "49"}], 'age')
@@ -163,42 +163,36 @@ class TestCollections(unittest.TestCase):
     #     self.assertNotEqual([5, 10, 15, 4, 8], res,
     #                         "shuffled array was the same")
     #
-    # def test_size(self):
-    #     self.assertEqual(_.size({"one": 1, "two": 2, "three": 3}),
-    #                      3, 'can compute the size of an object')
-    #     self.assertEqual(_.size([1, 2, 3]), 3,
-    #                      'can compute the size of an array')
-    #
-    # def test_where(self):
-    #     List = [{"a": 1, "b": 2}, {"a": 2, "b": 2},
-    #             {"a": 1, "b": 3}, {"a": 1, "b": 4}]
-    #     result = _.where(List, {"a": 1})
-    #     self.assertEqual(_.size(result), 3)
-    #     self.assertEqual(result[-1]['b'], 4)
-    #
-    #     result = _.where(List, {"a": 1}, True)
-    #     self.assertEqual(result["b"], 2)
-    #
-    #     result = _.where(List, {"a": 1}, False)
-    #     self.assertEqual(_.size(result), 3)
-    #
-    # def test_findWhere(self):
-    #     List = [{"a": 1, "b": 2}, {"a": 2, "b": 2},
-    #             {"a": 1, "b": 3}, {"a": 1, "b": 4}]
-    #     result = _.findWhere(List, {"a": 1})
-    #     self.assertEqual(result["a"], 1)
-    #     self.assertEqual(result["b"], 2)
-    #
-    #     result = _.findWhere(List, {"b": 4})
-    #     self.assertEqual(result["a"], 1)
-    #     self.assertEqual(result["b"], 4)
-    #
-    #     result = _.findWhere(List, {"c": 1})
-    #     self.assertEqual(result, None)
-    #
-    #     result = _.findWhere([], {"c": 1})
-    #     self.assertEqual(result, None)
-    #
+    def test_size(self):
+        self.assertEqual(_.size({"one": 1, "two": 2, "three": 3}),
+                         3, 'can compute the size of an object')
+        self.assertEqual(_.size([1, 2, 3]), 3,
+                         'can compute the size of an array')
+
+    def test_where(self):
+        List = [{"a": 1, "b": 2}, {"a": 2, "b": 2},
+                {"a": 1, "b": 3}, {"a": 1, "b": 4}]
+        result = _.where(List, {"a": 1})
+        self.assertEqual(_.size(result), 3)
+        self.assertEqual(result[-1]['b'], 4)
+
+    def test_findWhere(self):
+        List = [{"a": 1, "b": 2}, {"a": 2, "b": 2},
+                {"a": 1, "b": 3}, {"a": 1, "b": 4}]
+        result = _.findWhere(List, {"a": 1})
+        self.assertEqual(result["a"], 1)
+        self.assertEqual(result["b"], 2)
+
+        result = _.findWhere(List, {"b": 4})
+        self.assertEqual(result["a"], 1)
+        self.assertEqual(result["b"], 4)
+
+        result = _.findWhere(List, {"c": 1})
+        self.assertEqual(result, None)
+
+        result = _.findWhere([], {"c": 1})
+        self.assertEqual(result, None)
+
     def test_indexBy(self):
         parity = _.indexBy([1, 2, 3, 4, 5], lambda num, *args: num % 2 == 0)
         self.assertEqual(parity[True], 4)
