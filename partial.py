@@ -1,5 +1,6 @@
 # partial.py
 import types
+from threading import Timer
 
 ___ = {}
 
@@ -507,9 +508,9 @@ class Partial(object):
         for key in keys:
             try:
                 if obj[key]:
-                   res = 'true'
+                   res = True
             except:
-                return 'false'
+                return False
         return res
 
     def extend(self, dest, *sources):
@@ -574,6 +575,38 @@ class Partial(object):
                     return 0
             return 1
         return is_match(obj)
+
+#     function
+    def memoize(self, func, hasher=None):
+        if hasher is None:
+            hasher = lambda x: x
+        cache = {}
+
+        def memoized(key):
+            address = hasher(key)
+            if address not in cache:
+                cache[address] = func(address)
+            return cache[address]
+
+        return memoized
+
+    def delay(self, func, wait, *args):
+
+        def call_it():
+            if len(args) is 0:
+                return func()
+            else:
+                if self.is_func(args[0]):
+                    return func(args[0])
+                else:
+                    return func(args)
+
+        t = Timer((float(wait)/float(1000)), call_it)
+        t.start()
+
+    def defer(self, func, *args):
+        # _.defer = _.partial(_.delay, _, 1);
+        return self.delay(func, 1, *args)
 
 _ = Partial()
 __ = _.pipe
