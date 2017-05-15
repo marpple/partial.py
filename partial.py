@@ -464,12 +464,13 @@ class Partial(object):
     always = const = lambda self, val, *rest: lambda *args: val
 
     # Objects
-    def isEqual(self, obj1, obj2=None):
+    def is_equal(self, obj1, obj2=None):
         if obj2 is None:
             return self.partial(self.isEqual, _, obj1)
         return obj1 == obj2
+    isEqual = is_equal
 
-    def isEmpty(self, obj=None):
+    def is_empty(self, obj=None):
         if obj is None:
             return True
         elif obj == "":
@@ -477,6 +478,7 @@ class Partial(object):
         elif len(obj) == 0:
             return True
         return False
+    isEmpty = is_empty
 
     def is_func(self, val):
         return isinstance(val, types.FunctionType) or callable(val)
@@ -512,22 +514,23 @@ class Partial(object):
 
     def is_mr(self, val):
         return self.is_dict(val) and val.get('_mr')
+    isMr = is_mr
 
-    def isType(self, obj):
+    def is_type(self, obj):
         return type(obj) is type
-    is_type = isType
+    isType = is_type
 
-    def isBoolean(self, obj):
+    def is_boolean(self, obj):
         return type(obj) is bool
-    is_bool = isBool = isBoolean
+    isBoolean = is_bool = is_boolean
 
-    def isInt(self, obj):
+    def is_int(self, obj):
         return type(obj) is int
-    is_int = isInt
+    isInt = is_int
 
-    def isString(self, obj):
+    def is_str(self, obj):
         return type(obj) is str
-    is_str = isStr = isString
+    isString = is_string = is_str
 
     def mr(self, *args):
         return {'value': args, '_mr': True}
@@ -587,6 +590,7 @@ class Partial(object):
 
     def propertyOf(self, key):
         return self.partial(self.val, key, _)
+    property_of = propertyOf
 
     def mapObject(self, obj, iteratee=None):
         if iteratee is None and self.is_func(obj):
@@ -595,6 +599,7 @@ class Partial(object):
         for key in obj.keys():
             res[key] = iteratee(float(obj[key]), key, obj)
         return res
+    map_object = mapObject
 
     # def pairs(self, obj):
     #     res = []
@@ -688,7 +693,7 @@ class Partial(object):
         return is_match(obj)
     isMatch = is_match = matcher
 
-#     function
+    # Functions
     def memoize(self, func, hasher=None):
         if hasher is None:
             hasher = lambda x: x
