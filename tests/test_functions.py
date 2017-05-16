@@ -41,47 +41,49 @@ class TestStructure(unittest.TestCase):
     #     self.assertEqual(o('upper'), 'upper', 'checks hasOwnProperty')
     #     self.assertEqual(fastO('upper'), 'upper', 'checks hasOwnProperty')
     #
-    def test_delay(self):
-        abc = False
-
-        def func(*args):
-            abc =True
-
-        _.delay(func, 150)
-
-        def checkFalse():
-            self.assertFalse(abc)
-            print("\nASYNC: delay. OK")
-
-        def checkTrue():
-            self.assertTrue(abc)
-            print("\nASYNC: delay. OK")
-
-        Timer(0.05, checkFalse).start()
-        Timer(0.20, checkTrue).start()
+    # def test_delay(self):
+    #     abc = False
     #
-    def test_defer(self):
-        ddd = False
-
-        def defertTest(bool):
-            ddd = bool
-
-        _.defer(defertTest, True)
-
-        def deferCheck():
-            self.assertTrue(True, "deferred the function")
-            print("\nASYNC: defer. OK")
-
-        _.delay(deferCheck, 50)
+    #     def func():
+    #         nonlocal abc
+    #         abc =True
+    #
+    #     _.delay(func, 150)
+    #
+    #     def checkFalse():
+    #         self.assertFalse(abc)
+    #         print("\nASYNC: delay. OK")
+    #
+    #     def checkTrue():
+    #         self.assertTrue(abc)
+    #         print("\nASYNC: delay. OK")
+    #
+    #     Timer(0.05, checkFalse).start()
+    #     Timer(0.20, checkTrue).start()
+    # #
+    # def test_defer(self):
+    #     ddd = False
+    #
+    #     def defertTest(bool):
+    #         ddd = bool
+    #
+    #     _.defer(defertTest, True)
+    #
+    #     def deferCheck():
+    #         self.assertTrue(True, "deferred the function")
+    #         print("\nASYNC: defer. OK")
+    #
+    #     _.delay(deferCheck, 50)
     #
     # def test_throttle(self):
-    #     ns = self.Namespace()
-    #     ns.counter = 0
+    #     abc = 0
     #
     #     def incr():
-    #         ns.counter += 1
+    #         nonlocal abc
+    #         print(abc)
+    #         abc += 1
     #
-    #     throttledIncr = _.throttle(incr, 100)
+    #     throttledIncr = _.throttle(incr, 0.1)
     #     throttledIncr()
     #     throttledIncr()
     #     throttledIncr()
@@ -91,24 +93,24 @@ class TestStructure(unittest.TestCase):
     #     Timer(0.19, throttledIncr).start()
     #     Timer(0.22, throttledIncr).start()
     #     Timer(0.34, throttledIncr).start()
-    #
+    #     #
     #     def checkCounter1():
-    #         self.assertEqual(ns.counter, 1, "incr was called immediately")
+    #         self.assertEqual(abc, 1, "incr was called immediately")
     #         print("ASYNC: throttle. OK")
     #
     #     def checkCounter2():
-    #         self.assertEqual(ns.counter, 4, "incr was throttled")
+    #         self.assertEqual(abc, 4, "incr was throttledfffff")
     #         print("ASYNC: throttle. OK")
     #
     #     _.delay(checkCounter1, 90)
     #     _.delay(checkCounter2, 400)
-    #
+
     # def test_debounce(self):
-    #     ns = self.Namespace()
-    #     ns.counter = 0
+    #     con = 0
     #
     #     def incr():
-    #         ns.counter += 1
+    #         nonlocal con
+    #         con += 1
     #
     #     debouncedIncr = _.debounce(incr, 120)
     #     debouncedIncr()
@@ -121,24 +123,24 @@ class TestStructure(unittest.TestCase):
     #     Timer(0.15, debouncedIncr).start()
     #
     #     def checkCounter():
-    #         self.assertEqual(1, ns.counter, "incr was debounced")
+    #         self.assertEqual(1, con, "incr was debounced")
     #         print("ASYNC: debounce. OK")
     #
     #     _.delay(checkCounter, 300)
     #
-    # def test_once(self):
-    #     ns = self.Namespace()
-    #     ns.num = 0
-    #
-    #     def add():
-    #         ns.num += 1
-    #
-    #     increment = _.once(add)
-    #     increment()
-    #     increment()
-    #     increment()
-    #     increment()
-    #     self.assertEqual(ns.num, 1)
+    def test_once(self):
+        con = 0
+
+        def add():
+            nonlocal con
+            con += 1
+
+        increment = _.once(add)
+        increment()
+        increment()
+        increment()
+        increment()
+        self.assertEqual(con, 1)
     #
     # def test_wrap(self):
     #     def greet(name):
@@ -175,12 +177,14 @@ class TestStructure(unittest.TestCase):
     #
     # def test_after(self):
     #
+    #     con = None
     #     def testAfter(afterAmount, timesCalled):
-    #         ns = self.Namespace()
-    #         ns.afterCalled = 0
+    #         nonlocal con
+    #         con = 0
     #
     #         def afterFunc():
-    #             ns.afterCalled += 1
+    #             nonlocal con
+    #             con += 1
     #
     #         after = _.after(afterAmount, afterFunc)
     #
@@ -188,13 +192,13 @@ class TestStructure(unittest.TestCase):
     #             after()
     #             timesCalled -= 1
     #
-    #         return ns.afterCalled
+    #         return con
     #
     #     self.assertEqual(testAfter(5, 5), 1,
     #                      "after(N) should fire after being called N times")
     #     self.assertEqual(testAfter(5, 4), 0,
     #                      "after(N) should not fire unless called N times")
-    #     self.assertEqual(testAfter(0, 0), 1,
+    #     self.assertEqual(testAfter(0, 1), 1,
     #                      "after(0) should fire immediately")
     #
     # def test_partial(self):

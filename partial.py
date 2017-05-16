@@ -342,6 +342,11 @@ class Partial(object):
         return res
     unique = uniq
 
+    def uniq2(self, arr, iteratee=None):
+        arr = self.map(arr, iteratee) if iteratee else arr
+        res = {val for val in arr}
+        return list(res)
+
     def without(self, arr, *values):
         return self.difference(arr, values)
 
