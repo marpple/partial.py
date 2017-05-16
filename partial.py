@@ -38,11 +38,10 @@ class Partial(object):
             for j in range(len(args1)):
                 if args1[j] == _:
                     args1[j] = rest.pop(0)
-            for j in range(len(args2)):
+            for j in range(len(args2)-1, -1, -1):
                 if args2[j] == _:
                     args2[j] = rest.pop()
-            merged = args1 + rest + args2
-            return func(*merged)
+            return func(*(args1 + rest + args2))
         return _partial
 
     # Collections
@@ -335,17 +334,12 @@ class Partial(object):
 
     def uniq(self, arr, iteratee=None):
         res, tmp, cmp = ([], [], self.map(arr, iteratee) if iteratee else arr)
-        for i in range(len(arr)):
+        for i, v in enumerate(arr):
             if cmp[i] not in tmp:
                 tmp.append(cmp[i])
-                res.append(arr[i])
+                res.append(v)
         return res
     unique = uniq
-
-    def uniq2(self, arr, iteratee=None):
-        arr = self.map(arr, iteratee) if iteratee else arr
-        res = {val for val in arr}
-        return list(res)
 
     def without(self, arr, *values):
         return self.difference(arr, values)

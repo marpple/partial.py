@@ -1,7 +1,7 @@
 import unittest
 # from unittesthelper import init
 # init()  # will let you import modules from upper folder
-from partial import _
+from partial import _, __, ___
 from threading import Timer
 
 
@@ -201,11 +201,11 @@ class TestStructure(unittest.TestCase):
     #     self.assertEqual(testAfter(0, 1), 1,
     #                      "after(0) should fire immediately")
     #
-    # def test_partial(self):
-    #     def func(*args):
-    #         return ' '.join(args)
-    #     pfunc = _.partial(func, 'a', 'b', 'c')
-    #     self.assertEqual(pfunc('d', 'e'), 'a b c d e')
+
+    def test_partial(self):
+        func = _.partial(lambda *args: args, _, 10, ___, _, 100, _, 300)
+        self.assertEqual((0, 10, 20, 30, 40, 50, 60, 100, 200, 300),
+                         func(0, 20, 30, 40, 50, 60, 200), "partial did not work")
 
 if __name__ == "__main__":
     print("run these tests by executing `python -m unittest"
