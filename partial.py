@@ -5,6 +5,7 @@
 import types
 from threading import Timer
 import time
+import copy
 
 ___ = {}
 
@@ -335,6 +336,7 @@ class Partial(object):
 
     def uniq(self, arr, iteratee=None):
         res, tmp, cmp = ([], [], self.map(arr, iteratee) if iteratee else arr)
+        # print(res, tmp, cmp)
         for i in range(len(arr)):
             if cmp[i] not in tmp:
                 tmp.append(cmp[i])
@@ -344,6 +346,7 @@ class Partial(object):
 
     def uniq2(self, arr, iteratee=None):
         arr = self.map(arr, iteratee) if iteratee else arr
+        print(arr)
         res = {val for val in arr}
         return list(res)
 
@@ -530,10 +533,6 @@ class Partial(object):
         return type(obj) is bool
     isBoolean = is_bool = is_boolean
 
-    def is_int(self, obj):
-        return type(obj) is int
-    isInt = is_int
-
     def is_str(self, obj):
         return type(obj) is str
     isString = is_string = is_str
@@ -567,29 +566,25 @@ class Partial(object):
         return lambda *args: not predicate(*args)
 
     def keys(self, obj):
-        if type(obj) is not dict:
-            return []
-        return obj.keys()
+        return obj.keys() if self.is_dict(obj) else []
 
     def values(self, obj):
-        if type(obj) is not dict:
-            return []
-        return obj.values()
+        return obj.values() if self.is_dict(obj) else []
 
     def val(self, obj, *keys):
         if len(keys) is 1:
             try:
-                neww = obj[keys[0]]
+                res = obj[keys[0]]
             except:
-                neww = []
+                res = None
         else:
-            neww = []
+            res = []
             for key in keys:
                 try:
-                    neww.append(obj[key])
+                    res.append(obj[key])
                 except:
                     continue
-        return neww
+        return res
 
     def property(self, key):
         return self.partial(self.val, _, key)
@@ -601,29 +596,20 @@ class Partial(object):
     def mapObject(self, obj, iteratee=None):
         if iteratee is None and self.is_func(obj):
             return self.partial(self.mapObject, _, obj)
-        res = {}
-        for key in obj.keys():
-            res[key] = iteratee(float(obj[key]), key, obj)
-        return res
+        return {key: iteratee(self.num(obj[key]) if _.is_num(obj[key]) else obj[key], key, obj) for key in obj.keys()}
     map_object = mapObject
 
-    # def pairs(self, obj):
-    #     res = []
-    #     for val in obj.items():
-    #         res.append(list(val))
-    #     return res
+    def num(self, str):
+        try:
+            return int(str)
+        except ValueError:
+            return float(str)
 
     def pairs(self, obj):
-        res = []
-        for key in obj:
-            res.append([key, obj[key]])
-        return res
+        return [[key, obj[key]] for key in obj]
 
     def invert(self, obj):
-        res = {}
-        for key in obj.keys():
-            res[obj[key]] = key
-        return res
+        return {obj[key]: key for key in obj.keys()}
 
     def has(self, obj, *keys):
         for key in keys:
@@ -635,30 +621,30 @@ class Partial(object):
         return res
 
     def extend(self, dest, *sources):
-        sources = list(sources)
-        for i in sources:
+        if len(sources) is 0:
+            return self.partial(self.pick, _, dest)
+
+        for i in list(sources):
             dest.update(i)
         return dest
 
     def defaults(self, dest, *sources):
+        if len(sources) is 0:
+            return self.partial(self.pick, _, dest)
+
         sources = self.extend({}, *sources)
         for key in sources:
-            dest.setdefault(key , sources[key])
+            dest.setdefault(key, sources[key])
         return dest
 
     def pick(self, obj, *keys):
         if len(keys) is 0:
             return self.partial(self.pick, _, obj)
-        res = {}
         if self.is_func(keys[0]):
-            for key in obj:
-                if keys[0](obj[key], key, obj):
-                    res[key] = obj[key]
+            return {key: obj[key] for key in obj if key[0](obj[key], key, obj)}
         else:
             flat = _.flatten(keys)
-            for key in flat:
-                res[key] = obj[key]
-        return res
+            return {key: obj[key] for key in flat}
 
     def omit(self, obj, *keys):
         if len(keys) is 0:
@@ -676,33 +662,23 @@ class Partial(object):
         return res
 
     def clone(self, obj):
-        import copy
         return copy.copy(obj)
 
-    def val2(self, obj, key):
-        try:
-            return obj[key]
-        except:
-            return ""
+    def matcher(self, attrs):
+        return self.partial(self.is_match, _, attrs)
 
-    def matcher(self, obj, *attrs):
-        if len(attrs) is 0 :
-            return self.partial(self.matcher, _, obj)
-
-        def is_match(obj):
-            attr = attrs[0]
-            keys = self.keys(attr)
-            for key in keys:
-                if attr[key] != self.val2(obj, key) or key not in obj:
-                    return 0
-            return 1
-        return is_match(obj)
-    isMatch = is_match = matcher
+    def is_match(self, obj, attrs, *args):
+        for key in attrs.keys():
+            if attrs[key] != self.val(obj, key):
+                return False
+        return True
+    isMatch = is_match
 
     # Functions
     def memoize(self, func, hasher=None):
         if hasher is None:
             hasher = lambda x: x
+
         cache = {}
 
         def memoized(key):
@@ -722,18 +698,15 @@ class Partial(object):
                 if self.is_func(args[0]):
                     return func(args[0])
                 else:
-                    return func(args)
+                    return func(*args)
 
-        t = Timer((float(wait)/float(1000)), call_it)
-        t.start()
+        Timer((float(wait)/float(1000)), call_it).start()
 
     def defer(self, func, *args):
         return self.delay(func, 1, *args)
 
-    def retrn(self, func, args):
-        if len(args) == 0:
-            return func()
-        return func(*args)
+    def retrn(self, func, *args):
+            return func() if len(args) == 0 else func(*args)
 
     def throttle(self, func, wait):
         previous = 0
@@ -742,20 +715,20 @@ class Partial(object):
         def throttled(*args):
             nonlocal previous, timeout
             result = going = None
+            now = time.time()
+            remaining = wait - (now - previous)
 
             def later():
                 nonlocal timeout, result
                 timeout = False
-                result = self.retrn(func, args)
+                result = self.retrn(func, *args)
 
-            now = time.time()
-            remaining = wait - (now - previous)
             if remaining <= 0:
                 if timeout is True:
                     going.cancel()
                     timeout = False
                 previous = now
-                result = self.retrn(func, args)
+                result = self.retrn(func, *args)
             elif timeout is False:
                 timeout = True
                 going = Timer(remaining, later)
@@ -769,10 +742,10 @@ class Partial(object):
 
         def debounced(*args):
             def call_it():
-                return self.retrn(func, args)
+                return self.retrn(func, *args)
             try:
                 debounced.t.cancel()
-            except(AttributeError):
+            except:
                 pass
             debounced.t = Timer(wait, call_it)
             debounced.t.start()
@@ -784,7 +757,7 @@ class Partial(object):
             nonlocal times
             times -=1
             if times < 1:
-                self.retrn(func, args)
+                return self.retrn(func, *args)
         return aftered
 
     def before(self, times, func):
@@ -794,7 +767,7 @@ class Partial(object):
             times -=1
             if times < 0:
                 return memo
-            memo = self.retrn(func, args)
+            memo = self.retrn(func, *args)
             return memo
         return befored
 

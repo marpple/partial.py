@@ -14,10 +14,10 @@ class TestObjects(unittest.TestCase):
         self.assertEqual(set(_.values({"one": 1, "two": 2})),
                          {2, 1}, 'can extract the values from an object')
 
-    def test_functions(self):
-        obj = {"a": 'dash', "b": _.map, "c": ("/yo/"), "d": _.reduce}
-        self.assertEqual(['b', 'd'], _.functions(obj),
-                         'can grab the function names of any passed-in object')
+    # def test_functions(self):
+    #     obj = {"a": 'dash', "b": _.map, "c": ("/yo/"), "d": _.reduce}
+    #     self.assertEqual(['b', 'd'], _.functions(obj),
+    #                      'can grab the function names of any passed-in object')
 
     def test_extend(self):
 
@@ -138,35 +138,35 @@ class TestObjects(unittest.TestCase):
     class Namespace:
         pass
 
-    def test_tap(self):
-        ns = self.Namespace()
-        ns.intercepted = None
-
-        def interceptor(obj):
-            ns.intercepted = obj
-
-        returned = _.tap(1, interceptor)
-        self.assertEqual(ns.intercepted, 1,
-                         "passes tapped object to interceptor")
-        self.assertEqual(returned, 1, "returns tapped object")
-
-        returned = _([1, 2, 3]).chain().map(
-            lambda n, *args: n * 2).max().tap(interceptor).value()
-        self.assertTrue(returned == 6 and ns.intercepted == 6,
-                        'can use tapped objects in a chain')
+    # def test_tap(self):
+    #     ns = self.Namespace()
+    #     ns.intercepted = None
+    #
+    #     def interceptor(obj):
+    #         ns.intercepted = obj
+    #
+    #     returned = _.tap(1, interceptor)
+    #     self.assertEqual(ns.intercepted, 1,
+    #                      "passes tapped object to interceptor")
+    #     self.assertEqual(returned, 1, "returns tapped object")
+    #
+    #     returned = _([1, 2, 3]).chain().map(
+    #         lambda n, *args: n * 2).max().tap(interceptor).value()
+    #     self.assertTrue(returned == 6 and ns.intercepted == 6,
+    #                     'can use tapped objects in a chain')
 
     def test_pairs(self):
         r = _.pairs({"one": 1, "two": 2})
         self.assertEqual(sorted(r), [["one", 1], ["two", 2]],
                          'can convert an object into pairs')
 
-    def test_invert(self):
-        obj = {"first": 'Moe', "second": 'Larry', "third": 'Curly'}
-        r = _(obj).chain().invert().keys().join(' ').value()
-        self.assertEqual(set(r), set('Larry Moe Curly'),
-                         'can invert an object')
-        self.assertEqual(_.invert(_.invert(obj)), obj,
-                         "two inverts gets you back where you started")
+    # def test_invert(self):
+    #     obj = {"first": 'Moe', "second": 'Larry', "third": 'Curly'}
+    #     r = _(obj).chain().invert().keys().join(' ').value()
+    #     self.assertEqual(set(r), set('Larry Moe Curly'),
+    #                      'can invert an object')
+    #     self.assertEqual(_.invert(_.invert(obj)), obj,
+    #                      "two inverts gets you back where you started")
 
     def test_matches(self):
         moe = {"name": 'Moe Howard', "hair": True}
