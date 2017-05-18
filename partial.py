@@ -623,7 +623,7 @@ class Partial(object):
         for key in keys:
             try:
                 if obj[key]:
-                   res = True
+                    res = True
             except:
                 return False
         return res
@@ -776,16 +776,17 @@ class Partial(object):
     def after(self, times, func):
         def aftered(*args):
             nonlocal times
-            times -=1
+            times -= 1
             if times < 1:
                 self.retrn(func, args)
         return aftered
 
     def before(self, times, func):
         memo = None
+
         def befored(*args):
             nonlocal times, memo
-            times -=1
+            times -= 1
             if times < 0:
                 return memo
             memo = self.retrn(func, args)
