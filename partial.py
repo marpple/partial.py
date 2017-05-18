@@ -6,6 +6,7 @@ from threading import Timer
 import time
 import copy
 import types
+import random
 
 
 # partial, go, pipe
@@ -310,11 +311,24 @@ def __count_by(data, iteratee=lambda x, *r: x):
     return res
 _.count_by = _.countBy = __count_by
 
-# def shuffle(data):
 
-# def sample(data, *n):
+def __shuffle(data):
+    cloned = _.values(data) if _.is_dict(data) else data[:]
+    random.shuffle(cloned)
+    return cloned
+_.shuffle = __shuffle
 
-# def to_array(data):
+
+def __sample(data, n=None):
+    if n is None:
+        return _.shuffle(data)[0]
+    return _.shuffle(data)[0:n]
+_.sample = __sample
+
+
+def __to_array(data):
+    return list(data.values()) if _.is_dict(data) else list(data)
+_.to_array = _.toArray = __to_array
 
 
 def __size(data):
@@ -533,6 +547,13 @@ _.identity = _.idtt = __identity
 def __always(v, *r):
     return lambda *args: v
 _.always = _.const = __always
+
+
+def __random(min_num, max_num=None):
+    if max_num is None:
+        max_num = min_num
+        min_num = 0
+    return random.randrange(min_num, max_num)
 
 
 # Objects
@@ -780,7 +801,7 @@ def __matcher(attrs):
 _.matcher = __matcher
 
 
-def __is_match(obj, attrs, *args):
+def __is_match(obj, attrs, *r):
     for key in attrs.keys():
         if attrs[key] != _.val(obj, key):
             return False

@@ -157,12 +157,12 @@ class TestCollections(unittest.TestCase):
         self.assertEqual(grouped[3], 4)
         self.assertEqual(grouped[4], 3)
         self.assertEqual(grouped[5], 3)
-    #
-    # def test_shuffle(self):
-    #     res = _([5, 10, 15, 4, 8]).shuffle()
-    #     self.assertNotEqual([5, 10, 15, 4, 8], res,
-    #                         "shuffled array was the same")
-    #
+
+    def test_shuffle(self):
+        res = _.shuffle([5, 10, 15, 4, 8])
+        self.assertNotEqual([5, 10, 15, 4, 8], res,
+                            "shuffled array was the same")
+
     def test_size(self):
         self.assertEqual(_.size({"one": 1, "two": 2, "three": 3}),
                          3, 'can compute the size of an object')
