@@ -206,6 +206,28 @@ class TestStructure(unittest.TestCase):
         func = _.partial(lambda *args: args, _, 10, ___, _, 100, _, 300)
         self.assertEqual((0, 10, 20, 30, 40, 50, 60, 100, 200, 300),
                          func(0, 20, 30, 40, 50, 60, 200), "partial did not work")
+        func = _(lambda *args: args, _, 10, ___, _, 100, _, 300)
+        self.assertEqual((0, 10, 20, 30, 40, 50, 60, 100, 200, 300),
+                         func(0, 20, 30, 40, 50, 60, 200), "_ did not work")
+
+    def test_pipe(self):
+        sum = lambda a, b: a + b
+        sub = lambda a, b: a - b
+        mul = lambda a, b: a * b
+        sub1 = _(sub, _, 1)
+        mul2 = _(mul, _, 2)
+
+        def _hi(*args):
+            print(*args)
+            return _.mr(*args)
+
+        func = _.pipe(sum, sub1, sub1, mul2)
+        self.assertEqual(16, func(7, 3), "pipe did not work")
+        func = __(sum, _.idtt, sub1, sub1, mul2)
+        self.assertEqual(16, func(7, 3), "__ did not work")
+        func = __(_hi, sum, _hi, sub1, sub1, mul2)
+        self.assertEqual(16, func(7, 3), "__ did not work")
+
 
 if __name__ == "__main__":
     print("run these tests by executing `python -m unittest"

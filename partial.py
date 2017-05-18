@@ -525,8 +525,14 @@ _.range = __range
 
 
 # Utility
-_.identity = _.idtt = lambda v, *r: v
-_.always = _.const = lambda v, *r: lambda *args: v
+def __identity(v, *r):
+    return v
+_.identity = _.idtt = __identity
+
+
+def __always(v, *r):
+    return lambda *args: v
+_.always = _.const = __always
 
 
 # Objects
@@ -545,18 +551,52 @@ def __is_empty(obj=None):
     elif len(obj) == 0:
         return True
     return False
-
 _.is_empty = _.isEmpty = __is_empty
-_.is_func = _.isFunction = _.is_function = lambda o, *r: isinstance(o, types.FunctionType) or callable(o)
-_.is_dict = _.isDictionary = _.is_dictionary = lambda o, *r: type(o) is dict
-_.is_list = _.isList = lambda o, *r: type(o) is list
-_.is_tuple = _.isTuple = lambda o, *r: type(o) is tuple
-_.is_none = _.isNone = lambda o, *r: o is None
-_.is_bool = _.isBool = lambda o, *r: type(o) is bool
-_.is_num = _.is_number = _.isNumber = lambda o, *r: isinstance(val, (int, float, complex))
-_.is_str = _.is_string = _.isString = lambda o, *r: type(o) is str
-_.is_type = _.isType = lambda o, *r: type(o) is type
-_.is_mr = lambda o, *r: type(o) is dict and o.get('_mr')
+
+
+def __is_function(o, *r):
+    return isinstance(o, types.FunctionType) or callable(o)
+_.is_func = _.isFunction = _.is_function = __is_function
+
+
+def __is_dictionary(o, *r):
+    return type(o) is dict
+_.is_dict = _.isDictionary = _.is_dictionary = __is_dictionary
+
+
+def __is_list(o, *r):
+    return type(o) is list
+_.is_list = _.isList = __is_list
+
+
+def __is_tuple(o, *r):
+    return type(o) is tuple
+_.is_tuple = _.isTuple = __is_tuple
+
+
+def __is_none(o, *r):
+    return o is None
+_.is_none = _.isNone = __is_none
+
+
+def __is_bool(o, *r):
+    return type(o) is bool
+_.is_bool = _.isBool = __is_bool
+
+
+def __is_number(o, *r):
+    return isinstance(o, (int, float, complex))
+_.is_num = _.is_number = _.isNumber = __is_number
+
+
+def __is_string(o, *r):
+    return type(o) is str
+_.is_str = _.is_string = _.isString = __is_string
+
+
+def __is_type(o, *r):
+    return type(o) is type
+_.is_type = _.isType = __is_type
 
 
 def __is_list_or_tuple(o):
@@ -565,9 +605,19 @@ def __is_list_or_tuple(o):
 _.is_list_or_tuple = __is_list_or_tuple
 
 
+def __is_mr(o, *r):
+    return type(o) is dict and o.get('_mr')
+_.is_mr = __is_mr
+
+
 def __mr(*args):
     return {'value': args, '_mr': True}
 _.mr = __mr
+
+
+def __to_mr(args):
+    return {'value': args, '_mr': True}
+_.mr_to = __to_mr
 
 
 def __find_i(arr, predicate=None):
@@ -854,5 +904,4 @@ def __once(func):
 _.once = __once
 
 
-_.VERSION = '0.5.0'
 ___ = {}
