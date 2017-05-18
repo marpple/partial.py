@@ -145,8 +145,7 @@ class TestObjects(unittest.TestCase):
 
     def test_invert(self):
         obj = {"first": 'Moe', "second": 'Larry', "third": 'Curly'}
-        r = _(obj).invert().keys().join(' ').value()
-        r= _.go(obj, _.invert, _.keys, _.join(' '))
+        r = _.go(obj, _.invert, _.keys, lambda arr: ' '.join(arr))
         self.assertEqual(set(r), set('Larry Moe Curly'),
                          'can invert an object')
         self.assertEqual(_.invert(_.invert(obj)), obj,

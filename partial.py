@@ -600,12 +600,12 @@ _.negate = __negate
 
 
 def __keys(obj):
-    return obj.keys() if _.is_dict(obj) else []
+    return list(obj.keys()) if _.is_dict(obj) else []
 _.keys = __keys
 
 
 def __values(obj):
-    return obj.values() if _.is_dict(obj) else []
+    return list(obj.values()) if _.is_dict(obj) else []
 _.values = __values
 
 
