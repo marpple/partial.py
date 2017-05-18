@@ -2,8 +2,8 @@
 # Project Lead - Indong Yoo
 # Maintainers - Jeongik Park, Joeun Ha
 # (c) 2017 Marpple. MIT Licensed.
-import types
 from threading import Timer
+import types
 import time
 import copy
 
@@ -336,12 +336,18 @@ class Partial(object):
     def uniq(self, arr, iteratee=None):
         res, tmp, cmp = ([], [], self.map(arr, iteratee) if iteratee else arr)
         # print(res, tmp, cmp)
-        for i, v in enumerate(arr):
+        for i in range(len(arr)):
             if cmp[i] not in tmp:
                 tmp.append(cmp[i])
-                res.append(v)
+                res.append(arr[i])
         return res
     unique = uniq
+
+    def uniq2(self, arr, iteratee=None):
+        arr = self.map(arr, iteratee) if iteratee else arr
+        print(arr)
+        res = {val for val in arr}
+        return list(res)
 
     def without(self, arr, *values):
         return self.difference(arr, values)
@@ -559,25 +565,25 @@ class Partial(object):
         return lambda *args: not predicate(*args)
 
     def keys(self, obj):
-        return obj.keys() if self.is_dict(obj) else []
+        return list(obj.keys()) if self.is_dict(obj) else []
 
     def values(self, obj):
         return obj.values() if self.is_dict(obj) else []
 
-    def val(self, obj, *keys):
-        if len(keys) is 1:
-            try:
-                res = obj[keys[0]]
-            except:
-                res = None
-        else:
-            res = []
-            for key in keys:
-                try:
-                    res.append(obj[key])
-                except:
-                    continue
-        return res
+    # def val(self, obj, *keys):
+    #     if len(keys) is 1:
+    #         try:
+    #             res = obj[keys[0]]
+    #         except:
+    #             res = None
+    #     else:
+    #         res = []
+    #         for key in keys:
+    #             try:
+    #                 res.append(obj[key])
+    #             except:
+    #                 continue
+    #     return res
 
     def property(self, key):
         return self.partial(self.val, _, key)
@@ -662,7 +668,7 @@ class Partial(object):
 
     def is_match(self, obj, attrs, *args):
         for key in attrs.keys():
-            if attrs[key] != self.val(obj, key):
+            if attrs[key] != obj.get(key):
                 return False
         return True
     isMatch = is_match
@@ -698,7 +704,7 @@ class Partial(object):
     def defer(self, func, *args):
         return self.delay(func, 1, *args)
 
-    def retrn(self, func, *args):
+    def __retrn__(self, func, *args):
             return func() if len(args) == 0 else func(*args)
 
     def throttle(self, func, wait):
@@ -714,14 +720,14 @@ class Partial(object):
             def later():
                 nonlocal timeout, result
                 timeout = False
-                result = self.retrn(func, *args)
+                result = self.__retrn__(func, *args)
 
             if remaining <= 0:
                 if timeout is True:
                     going.cancel()
                     timeout = False
                 previous = now
-                result = self.retrn(func, *args)
+                result = self.__retrn__(func, *args)
             elif timeout is False:
                 timeout = True
                 going = Timer(remaining, later)
@@ -735,7 +741,7 @@ class Partial(object):
 
         def debounced(*args):
             def call_it():
-                return self.retrn(func, *args)
+                return self.__retrn__(func, *args)
             try:
                 debounced.t.cancel()
             except:
@@ -750,7 +756,7 @@ class Partial(object):
             nonlocal times
             times -=1
             if times < 1:
-                return self.retrn(func, *args)
+                return self.__retrn__(func, *args)
         return aftered
 
     def before(self, times, func):
@@ -760,12 +766,17 @@ class Partial(object):
             times -=1
             if times < 0:
                 return memo
-            memo = self.retrn(func, *args)
+            memo = self.__retrn__(func, *args)
             return memo
         return befored
 
     def once(self, func):
         return self.before(1, func)
+
+    def join(self, obj, express=None):
+        if express is None:
+            return self.partial(self.join, _, obj)
+        return express.join(obj)
 
 _ = Partial()
 __ = _.pipe
