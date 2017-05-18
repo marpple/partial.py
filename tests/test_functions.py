@@ -105,29 +105,29 @@ class TestStructure(unittest.TestCase):
     #     _.delay(checkCounter1, 90)
     #     _.delay(checkCounter2, 400)
 
-    # def test_debounce(self):
-    #     con = 0
-    #
-    #     def incr():
-    #         nonlocal con
-    #         con += 1
-    #
-    #     debouncedIncr = _.debounce(incr, 120)
-    #     debouncedIncr()
-    #     debouncedIncr()
-    #     debouncedIncr()
-    #     Timer(0.03, debouncedIncr).start()
-    #     Timer(0.06, debouncedIncr).start()
-    #     Timer(0.09, debouncedIncr).start()
-    #     Timer(0.12, debouncedIncr).start()
-    #     Timer(0.15, debouncedIncr).start()
-    #
-    #     def checkCounter():
-    #         self.assertEqual(1, con, "incr was debounced")
-    #         print("ASYNC: debounce. OK")
-    #
-    #     _.delay(checkCounter, 300)
-    #
+    def test_debounce(self):
+        con = 0
+
+        def incr():
+            nonlocal con
+            con += 1
+
+        debouncedIncr = _.debounce(incr, 120)
+        debouncedIncr()
+        debouncedIncr()
+        debouncedIncr()
+        Timer(0.03, debouncedIncr).start()
+        Timer(0.06, debouncedIncr).start()
+        Timer(0.09, debouncedIncr).start()
+        Timer(0.12, debouncedIncr).start()
+        Timer(0.15, debouncedIncr).start()
+
+        def checkCounter():
+            self.assertEqual(1, con, "incr was debounced")
+            print("ASYNC: debounce. OK")
+
+        _.delay(checkCounter, 300)
+
     def test_once(self):
         con = 0
 
