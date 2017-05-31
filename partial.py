@@ -337,7 +337,17 @@ def __size(data):
     return len(data) if _.is_list_or_tuple(data) else len(data.keys())
 _.size = __size
 
-# def partition(data, predicate):
+
+def __partition(data, predicate=lambda x, *r: x):
+    if _.is_func(data):
+        return _(_.partition, _, data)
+    if _.is_str(predicate):
+        key = predicate
+        predicate = lambda x, *r: x[key]
+    filtered, rejected = ([], [])
+    _.each(data, lambda v, i, d: filtered.append(v) if predicate(v, i, data) else rejected.append(v))
+    return [filtered, rejected]
+_.partition = __partition
 
 
 # Arrays

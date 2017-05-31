@@ -212,35 +212,35 @@ class TestCollections(unittest.TestCase):
         self.assertEqual(grouped[1], 1)
         self.assertEqual(grouped[2], 2)
         self.assertEqual(grouped[3], 3)
-    #
-    # def test_partition(self):
-    #
-    #     list = [0, 1, 2, 3, 4, 5]
-    #
-    #     self.assertEqual(_.partition(list, lambda x, *args: x < 4),
-    #                      [[0, 1, 2, 3], [4, 5]], 'handles bool return values')
-    #     self.assertEqual(_.partition(list, lambda x, *args: x & 1),
-    #                      [[1, 3, 5], [0, 2, 4]],
-    #                      'handles 0 and 1 return values')
-    #     self.assertEqual(_.partition(list, lambda x, *args: x - 3),
-    #                      [[0, 1, 2, 4, 5], [3]],
-    #                      'handles other numeric return values')
-    #     self.assertEqual(
-    #         _.partition(list, lambda x, *args: None if x > 1 else True),
-    #         [[0, 1], [2, 3, 4, 5]], 'handles null return values')
-    #
-    #     # Test an object
-    #     result = _.partition({"a": 1, "b": 2, "c": 3}, lambda x, *args: x > 1)
-    #     # Has to handle difference between python3 and python2
-    #     self.assertTrue(
-    #         (result == [[3, 2], [1]] or result == [[2, 3], [1]]),
-    #         'handles objects')
-    #
-    #     # Default iterator
-    #     self.assertEqual(_.partition([1, False, True, '']),
-    #                      [[1, True], [False, '']], 'Default iterator')
-    #     self.assertEqual(_.partition([{"x": 1}, {"x": 0}, {"x": 1}], 'x'),
-    #                      [[{"x": 1}, {"x": 1}], [{"x": 0}]], 'Takes a string')
+
+    def test_partition(self):
+
+        list = [0, 1, 2, 3, 4, 5]
+
+        self.assertEqual(_.partition(list, lambda x, *args: x < 4),
+                         [[0, 1, 2, 3], [4, 5]], 'handles bool return values')
+        self.assertEqual(_.partition(list, lambda x, *args: x & 1),
+                         [[1, 3, 5], [0, 2, 4]],
+                         'handles 0 and 1 return values')
+        self.assertEqual(_.partition(list, lambda x, *args: x - 3),
+                         [[0, 1, 2, 4, 5], [3]],
+                         'handles other numeric return values')
+        self.assertEqual(
+            _.partition(list, lambda x, *args: None if x > 1 else True),
+            [[0, 1], [2, 3, 4, 5]], 'handles null return values')
+
+        # Test an object
+        result = _.partition({"a": 1, "b": 2, "c": 3}, lambda x, *args: x > 1)
+        # Has to handle difference between python3 and python2
+        self.assertTrue(
+            (result == [[3, 2], [1]] or result == [[2, 3], [1]]),
+            'handles objects')
+
+        # Default iterator
+        self.assertEqual(_.partition([1, False, True, '']),
+                         [[1, True], [False, '']], 'Default iterator')
+        self.assertEqual(_.partition([{"x": 1}, {"x": 0}, {"x": 1}], 'x'),
+                         [[{"x": 1}, {"x": 1}], [{"x": 0}]], 'Takes a string')
 
 
 if __name__ == "__main__":
