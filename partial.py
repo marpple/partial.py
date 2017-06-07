@@ -7,6 +7,7 @@ import time
 import copy
 import types
 import random
+import asyncio
 
 
 # partial, go, pipe
@@ -78,7 +79,8 @@ def __reduce(data, iteratee=None, memo=None):
     if _.is_func(data):
         return _(_.reduce, _, data, iteratee)
     if type(data) is list or type(data) is tuple:
-        memo = memo if memo else data.pop(0)
+        if memo is None:
+            memo = data.pop(0)
         for i in range(len(data)):
             memo = iteratee(memo, data[i], i, data)
     elif type(data) is dict:
@@ -96,7 +98,8 @@ def __reduce_right(data, iteratee=None, memo=None):
     if _.is_func(data):
         return _(_.reduce_right, _, data, iteratee)
     if type(data) is list or type(data) is tuple:
-        memo = memo if memo else data.pop()
+        if memo is None:
+            memo = data.pop()
         for i in range(len(data)-1, -1, -1):
             memo = iteratee(memo, data[i], i, data)
     elif type(data) is dict:
@@ -636,6 +639,11 @@ def __is_list_or_tuple(o):
 _.is_list_or_tuple = __is_list_or_tuple
 
 
+def __is_async(func):
+    return func.__code__.co_flags & (2 << 6) is 128
+_.is_async = __is_async
+
+
 def __is_mr(o, *r):
     return type(o) is dict and o.get('_mr')
 _.is_mr = __is_mr
@@ -934,5 +942,45 @@ def __once(func):
     return _.before(1, func)
 _.once = __once
 
+
+# Async Series
+def __asy():
+    return None
+_.asy = __asy
+
+
+async def __asy_go(seed, *funcs):
+    if _.is_func(seed):
+        seed = await seed() if _.is_async(seed) else seed()
+
+    for func in funcs:
+        if _.is_async(func):
+            seed = await func(*seed.get('value')) if _.is_mr(seed) else await func(seed)
+        else:
+            seed = func(*seed.get('value')) if _.is_mr(seed) else func(seed)
+    return seed
+_.asy.go = __asy_go
+
+
+def __asy_pipe(*funcs):
+    async def asy_func(*seed):
+        return await _.asy.go(seed[0] if len(seed) == 1 else _.mr(*seed), *funcs)
+
+    return asy_func
+_.asy.pipe = __asy_pipe
+
+
+async def __asy_map(data, iteratee=None):
+    if iteratee is None and _.is_func(data):
+        return _(_.asy.map, _, data)
+    res = []
+    if type(data) is list or type(data) is tuple:
+        for i in range(len(data)):
+            res.append(await iteratee(data[i], i, data))
+    elif type(data) is dict:
+        for k in data.keys():
+            res.append(await iteratee(data[k], k, data))
+    return res
+_.asy.map = _.asy.collect = __asy_map
 
 ___ = {}
