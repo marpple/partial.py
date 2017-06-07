@@ -21,6 +21,18 @@ def __partial(func, *parts):
         else:
             parts2.append(parts[i])
 
+    if _.is_asy(func):
+        async def asy_partial(*args):
+            args1, args2, rest = (parts1[:], parts2[:], list(args))
+            for j in range(len(args1)):
+                if args1[j] == _:
+                    args1[j] = rest.pop(0)
+            for j in range(len(args2) - 1, -1, -1):
+                if args2[j] == _:
+                    args2[j] = rest.pop()
+            return await func(*(args1 + rest + args2))
+        return asy_partial
+
     def _partial(*args):
         args1, args2, rest = (parts1[:], parts2[:], list(args))
         for j in range(len(args1)):
@@ -44,6 +56,12 @@ _.go = __go
 
 
 def __pipe(*funcs):
+    for func in funcs:
+        if _.is_asy(func):
+            async def asy_pipe(*seed):
+                return await _.asy.go(seed[0] if len(seed) == 1 else _.mr(*seed), *funcs)
+            return asy_pipe
+
     return lambda *seed: _.go(seed[0] if len(seed) == 1 else _.mr(*seed), *funcs)
 _.pipe = __ = __pipe
 
@@ -51,7 +69,9 @@ _.pipe = __ = __pipe
 # Collections
 def __each(data, iteratee=None):
     if iteratee is None and _.is_func(data):
-        return _(_.each, _, data)
+        return _(_.asy.each if _.is_asy(data) else _.each, _, data)
+    if _.is_asy(iteratee):
+        return _.asy.each(data, iteratee)
     if type(data) is list or type(data) is tuple:
         for i in range(len(data)):
             iteratee(data[i], i, data)
@@ -63,7 +83,9 @@ _.each = _.forEach = __each
 
 def __map(data, iteratee=None):
     if iteratee is None and _.is_func(data):
-        return _(_.map, _, data)
+        return _(_.asy.map if _.is_asy(data) else _.map, _, data)
+    if _.is_asy(iteratee):
+        return _.asy.map(data, iteratee)
     res = []
     if type(data) is list or type(data) is tuple:
         for i in range(len(data)):
@@ -640,8 +662,8 @@ _.is_list_or_tuple = __is_list_or_tuple
 
 
 def __is_async(func):
-    return func.__code__.co_flags & (2 << 6) is 128
-_.is_async = __is_async
+    return asyncio.iscoroutinefunction(func)
+_.is_asy = _.is_async = __is_async
 
 
 def __is_mr(o, *r):
@@ -944,30 +966,42 @@ _.once = __once
 
 
 # Async Series
-def __asy():
-    return None
+def __asy(): pass
 _.asy = __asy
 
 
 async def __asy_go(seed, *funcs):
     if _.is_func(seed):
-        seed = await seed() if _.is_async(seed) else seed()
+        seed = await seed() if _.is_asy(seed) else seed()
 
     for func in funcs:
-        if _.is_async(func):
+        if _.is_asy(func):
             seed = await func(*seed.get('value')) if _.is_mr(seed) else await func(seed)
         else:
             seed = func(*seed.get('value')) if _.is_mr(seed) else func(seed)
-    return seed
+
+    return await seed if asyncio.iscoroutine(seed) else seed
 _.asy.go = __asy_go
 
 
 def __asy_pipe(*funcs):
-    async def asy_func(*seed):
+    async def asy_pipe(*seed):
         return await _.asy.go(seed[0] if len(seed) == 1 else _.mr(*seed), *funcs)
 
-    return asy_func
+    return asy_pipe
 _.asy.pipe = __asy_pipe
+
+
+async def __asy_each(data, iteratee=None):
+    if iteratee is None and _.is_func(data):
+        return _(_.asy.each, _, data)
+    if type(data) is list or type(data) is tuple:
+        for i in range(len(data)):
+            await iteratee(data[i], i, data)
+    elif type(data) is dict:
+        for k in data.keys():
+            await iteratee(data[k], k, data)
+_.asy.each = __asy_each
 
 
 async def __asy_map(data, iteratee=None):
@@ -981,6 +1015,6 @@ async def __asy_map(data, iteratee=None):
         for k in data.keys():
             res.append(await iteratee(data[k], k, data))
     return res
-_.asy.map = _.asy.collect = __asy_map
+_.asy.map = __asy_map
 
 ___ = {}
