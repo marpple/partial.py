@@ -51,7 +51,7 @@ _.pipe = __ = __pipe
 def __each(data, iteratee=None):
     if iteratee is None and _.is_func(data):
         return _(_.each, _, data)
-    if type(data) is list or type(data) is tuple:
+    if type(data) is list or type(data) is tuple or type(data) is set:
         for i in range(len(data)):
             iteratee(data[i], i, data)
     elif type(data) is dict:
@@ -78,7 +78,10 @@ def __reduce(data, iteratee=None, memo=None):
     if _.is_func(data):
         return _(_.reduce, _, data, iteratee)
     if type(data) is list or type(data) is tuple:
-        memo = memo if memo else data.pop(0)
+        if memo is None:
+            memo = data.pop(0)
+        else:
+            memo = memo
         for i in range(len(data)):
             memo = iteratee(memo, data[i], i, data)
     elif type(data) is dict:
@@ -856,7 +859,7 @@ def __throttle(func, wait):
         nonlocal previous, timeout
         result = going = None
         now = time.time()
-        remaining = wait - (now - previous)
+        remaining = wait/1000 - (now - previous)
 
         def later():
             nonlocal timeout, result
