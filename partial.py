@@ -50,7 +50,12 @@ _.partial = __partial
 def __go(seed, *funcs):
     seed = seed() if _.is_func(seed) else seed
     for func in funcs:
-        seed = func(*seed.get('value')) if _.is_mr(seed) else func(seed)
+        if func is __:
+            seed = __
+        elif _.is_mr(seed):
+            seed = func(*seed.get('value'))
+        else:
+            seed = func() if seed is __ else func(seed)
     return seed
 _.go = __go
 
@@ -684,21 +689,6 @@ def __is_list_or_tuple(o):
 _.is_list_or_tuple = __is_list_or_tuple
 
 
-def __is_async(func):
-    return asyncio.iscoroutinefunction(func)
-_.is_asy = _.is_async = __is_async
-
-
-def __is_mr(o, *r):
-    return type(o) is dict and o.get('_mr')
-_.is_mr = __is_mr
-
-
-def __mr(*args):
-    return {'value': args, '_mr': True}
-_.mr = __mr
-
-
 def __to_mr(args):
     return {'value': args, '_mr': True}
 _.mr_to = __to_mr
@@ -991,6 +981,34 @@ def __once(func):
 _.once = __once
 
 
+# Utilities
+def __is_async(func):
+    return asyncio.iscoroutinefunction(func)
+_.is_asy = _.is_async = __is_async
+
+
+def __is_mr(*o):
+    return type(o[0]) is dict and o[0].get('_mr')
+_.is_mr = __is_mr
+
+
+def __mr(*args):
+    return {'value': args, '_mr': True}
+_.mr = __mr
+
+
+def __tap(*fns):
+    fns = __(*fns)
+
+    def tap(*args):
+        args = _.to_mr(args) if len(args) > 1 else args[0] if args[0] else __
+        return _.go(args, fns, _.const(args))
+    return tap
+_.tap = __tap
+
+_.hi = _.tap(print)
+
+
 # Async Series
 def __asy(): pass
 _.asy = __asy
@@ -999,16 +1017,19 @@ _.asy = __asy
 async def __asy_go(seed, *funcs):
     if _.is_func(seed):
         seed = await seed() if _.is_asy(seed) else seed()
+    if asyncio.iscoroutine(seed):
+        seed = await seed
 
     for func in funcs:
-        if asyncio.iscoroutine(seed):
-            seed = await seed
-        if asyncio.iscoroutinefunction(func):
+        if func is __:
+            seed = __
+        elif asyncio.iscoroutinefunction(func):
             seed = await func(*seed.get('value')) if _.is_mr(seed) else await func(seed)
         else:
-            seed = func(*seed.get('value')) if _.is_mr(seed) else func(seed)
-
-    return await seed if asyncio.iscoroutine(seed) else seed
+            seed = func(*seed.get('value')) if _.is_mr(seed) else func() if seed is __ else func(seed)
+            if asyncio.iscoroutine(seed):
+                seed = await seed
+    return seed
 _.asy.go = __asy_go
 
 
