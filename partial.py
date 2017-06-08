@@ -1001,7 +1001,9 @@ async def __asy_go(seed, *funcs):
         seed = await seed() if _.is_asy(seed) else seed()
 
     for func in funcs:
-        if _.is_asy(func):
+        if asyncio.iscoroutine(seed):
+            seed = await seed
+        if asyncio.iscoroutinefunction(func):
             seed = await func(*seed.get('value')) if _.is_mr(seed) else await func(seed)
         else:
             seed = func(*seed.get('value')) if _.is_mr(seed) else func(seed)
