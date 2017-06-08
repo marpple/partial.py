@@ -99,7 +99,9 @@ _.map = _.collect = __map
 
 def __reduce(data, iteratee=None, memo=None):
     if _.is_func(data):
-        return _(_.reduce, _, data, iteratee)
+        return _(_.asy.reduce if _.is_asy(data) else _.reduce, _, data, iteratee)
+    if _.is_asy(iteratee):
+        return _.asy.reduce(data, iteratee, memo)
     if type(data) is list or type(data) is tuple:
         if memo is None:
             memo = data.pop(0)
@@ -118,7 +120,9 @@ _.reduce = _.inject = _.fold = __reduce
 
 def __reduce_right(data, iteratee=None, memo=None):
     if _.is_func(data):
-        return _(_.reduce_right, _, data, iteratee)
+        return _(_.asy.reduce_right if _.is_asy(data) else _.reduce_right, _, data, iteratee)
+    if _.is_asy(iteratee):
+        return _.asy.reduce_right(data, iteratee, memo)
     if type(data) is list or type(data) is tuple:
         if memo is None:
             memo = data.pop()
@@ -137,7 +141,9 @@ _.reduce_right = _.foldr = _.reduceRight = __reduce_right
 
 def __find(data, predicate=None):
     if predicate is None and _.is_func(data):
-        return _(_.find, _, data)
+        return _(_.asy.find if _.is_asy(data) else _.find, _, data)
+    if _.is_asy(predicate):
+        return _.asy.find(data, predicate)
     if type(data) is list or type(data) is tuple:
         for i in range(len(data)):
             if predicate(data[i], i, data):
@@ -152,7 +158,9 @@ _.find = _.detect = __find
 
 def __filter(data, predicate=None):
     if predicate is None and _.is_func(data):
-        return _(_.filter, _, data)
+        return _(_.asy.filter if _.is_asy(data) else _.filter, _, data)
+    if _.is_asy(predicate):
+        return _.asy.filter(data, predicate)
     res = []
     if type(data) is list or type(data) is tuple:
         for i in range(len(data)):
@@ -182,14 +190,27 @@ _.findWhere = _.findWhere = __find_where
 
 def __reject(data, predicate=None):
     if predicate is None and _.is_func(data):
-        return _(_.reject, _, data)
-    return _.filter(data, _.negate(predicate))
+        return _(_.asy.reject if _.is_asy(data) else _.filter, _, data)
+    if _.is_asy(predicate):
+        return _.asy.reject(data, predicate)
+    res = []
+    if type(data) is list or type(data) is tuple:
+        for i in range(len(data)):
+            if not predicate(data[i], i, data):
+                res.append(data[i])
+    elif type(data) is dict:
+        for k in data.keys():
+            if not predicate(data[k], k, data):
+                res.append(data[k])
+    return res
 _.reject = __reject
 
 
 def __every(data, predicate=lambda x, *r: x):
     if _.is_func(data):
-        return _(_.every, _, data)
+        return _(_.asy.every if _.is_asy(data) else _.every, _, data)
+    if _.is_asy(predicate):
+        return _.asy.every(data, predicate)
     if type(data) is list or type(data) is tuple:
         for i in range(len(data)):
             if not predicate(data[i], i, data):
@@ -204,7 +225,9 @@ _.every = __every
 
 def __some(data, predicate=lambda x, *r: x):
     if _.is_func(data):
-        return _(_.some, _, data)
+        return _(_.asy.some if _.is_asy(data) else _.some, _, data)
+    if _.is_asy(predicate):
+        return _.asy.some(data, predicate)
     if type(data) is list or type(data) is tuple:
         for i in range(len(data)):
             if predicate(data[i], i, data):
@@ -291,8 +314,8 @@ _.min = __min
 
 def __sort_by(data, iteratee=lambda x, *r: x):
     if _.is_func(data) or type(data) is str:
-        _(_.sort_by, _, data)
-    res, iter = (list(data), iteratee if _.is_func(iteratee) else lambda o: o[iteratee])
+        return _(_.sort_by, _, data)
+    res, iter = (list(data), iteratee if _.is_func(iteratee) else lambda o, *r: o[iteratee])
     res.sort(key=iter)
     return res
 _.sort_by = _.sortBy = __sort_by
@@ -300,7 +323,7 @@ _.sort_by = _.sortBy = __sort_by
 
 def __group_by(data, iteratee=lambda x, *r: x):
     if _.is_func(data) or type(data) is str:
-        _(_.group_by, _, data)
+        return _(_.group_by, _, data)
     iter = iteratee if _.is_func(iteratee) else lambda o: o[iteratee]
     res, arr = ({}, _.map(data, iter))
     for i, v in enumerate(arr):
@@ -314,7 +337,7 @@ _.group_by = _.groupBy = __group_by
 
 def __index_by(data, iteratee=lambda x, *r: x):
     if _.is_func(data) or type(data) is str:
-        _(_.index_by, _, data)
+        return _(_.index_by, _, data)
     iter = iteratee if _.is_func(iteratee) else lambda o: o[iteratee]
     res, arr = ({}, _.map(data, iter))
     for i, v in enumerate(arr):
@@ -325,7 +348,7 @@ _.index_by = _.indexBy = __index_by
 
 def __count_by(data, iteratee=lambda x, *r: x):
     if _.is_func(data) or type(data) is str:
-        _(_.count_by, _, data)
+        return _(_.count_by, _, data)
     iter = iteratee if _.is_func(iteratee) else lambda o: o[iteratee]
     res, arr = ({}, _.map(data, iter))
     for i, v in enumerate(arr):
@@ -721,7 +744,10 @@ _.values = __values
 
 
 def __val(obj, *keys):
-    if len(keys) is 1:
+    l = len(keys)
+    if l is 0:
+        return _.property(obj)
+    elif l is 1:
         try:
             res = obj[keys[0]]
         except:
@@ -734,7 +760,7 @@ def __val(obj, *keys):
             except:
                 continue
     return res
-_.val = __val
+_.val = _.v = __val
 
 
 def __property(key):
@@ -1016,5 +1042,120 @@ async def __asy_map(data, iteratee=None):
             res.append(await iteratee(data[k], k, data))
     return res
 _.asy.map = __asy_map
+
+
+async def __asy_reduce(data, iteratee=None, memo=None):
+    if _.is_func(data):
+        return _(_.asy.reduce, _, data, iteratee)
+    if type(data) is list or type(data) is tuple:
+        if memo is None:
+            memo = data.pop(0)
+        for i in range(len(data)):
+            memo = await iteratee(memo, data[i], i, data)
+    elif type(data) is dict:
+        keys = data.keys()
+        if memo is None:
+            keys = list(keys)
+            memo = data[keys.pop(0)]
+        for k in keys:
+            memo = await iteratee(memo, data[k], k, data)
+    return memo
+_.asy.reduce = __asy_reduce
+
+
+async def __asy_reduce_right(data, iteratee=None, memo=None):
+    if _.is_func(data):
+        return _(_.asy.reduce_right, _, data, iteratee)
+    if type(data) is list or type(data) is tuple:
+        if memo is None:
+            memo = data.pop()
+        for i in range(len(data)-1, -1, -1):
+            memo = await iteratee(memo, data[i], i, data)
+    elif type(data) is dict:
+        keys = list(data.keys())
+        keys.reverse()
+        if memo is None:
+            memo = data[keys.pop(0)]
+        for k in keys:
+            memo = await iteratee(memo, data[k], k, data)
+    return memo
+_.asy.reduce_right = __asy_reduce_right
+
+
+async def __asy_find(data, predicate=None):
+    if predicate is None and _.is_func(data):
+        return _(_.asy.find, _, data)
+    if type(data) is list or type(data) is tuple:
+        for i in range(len(data)):
+            if await predicate(data[i], i, data):
+                return data[i]
+    elif type(data) is dict:
+        for k in data.keys():
+            if await predicate(data[k], k, data):
+                return data[k]
+    return None
+_.asy.find = __asy_find
+
+
+async def __asy_filter(data, predicate=None):
+    if predicate is None and _.is_func(data):
+        return _(_.asy.filter, _, data)
+    res = []
+    if type(data) is list or type(data) is tuple:
+        for i in range(len(data)):
+            if await predicate(data[i], i, data):
+                res.append(data[i])
+    elif type(data) is dict:
+        for k in data.keys():
+            if await predicate(data[k], k, data):
+                res.append(data[k])
+    return res
+_.asy.filter = __asy_filter
+
+
+async def __asy_reject(data, predicate=None):
+    if predicate is None and _.is_func(data):
+        return _(_.asy.reject, _, data)
+    res = []
+    if type(data) is list or type(data) is tuple:
+        for i in range(len(data)):
+            if not await predicate(data[i], i, data):
+                res.append(data[i])
+    elif type(data) is dict:
+        for k in data.keys():
+            if not await predicate(data[k], k, data):
+                res.append(data[k])
+    return res
+_.asy.reject = __asy_reject
+
+
+async def __asy_every(data, predicate=lambda x, *r: x):
+    if _.is_func(data):
+        return _(_.asy.every, _, data)
+    if type(data) is list or type(data) is tuple:
+        for i in range(len(data)):
+            if not await predicate(data[i], i, data):
+                return False
+    elif type(data) is dict:
+        for k in data.keys():
+            if not await predicate(data[k], k, data):
+                return False
+    return True
+_.asy.every = __asy_every
+
+
+async def __asy_some(data, predicate=lambda x, *r: x):
+    if _.is_func(data):
+        return _(_.some, _, data)
+    if type(data) is list or type(data) is tuple:
+        for i in range(len(data)):
+            if await predicate(data[i], i, data):
+                return True
+    elif type(data) is dict:
+        for k in data.keys():
+            if await predicate(data[k], k, data):
+                return True
+    return False
+_.asy.some = __asy_some
 
 ___ = {}
