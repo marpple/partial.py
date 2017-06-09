@@ -11,7 +11,7 @@ import asyncio
 
 
 # partial, go, pipe
-def __partial(func, *parts):
+def __partial(fn, *parts):
     parts1, parts2, ___idx = ([], [], len(parts))
     for i in range(___idx):
         if parts[i] == ___:
@@ -21,7 +21,7 @@ def __partial(func, *parts):
         else:
             parts2.append(parts[i])
 
-    if _.is_asy(func):
+    if _.is_asy(fn):
         async def asy_partial(*args):
             args1, args2, rest = (parts1[:], parts2[:], list(args))
             for j in range(len(args1)):
@@ -30,7 +30,7 @@ def __partial(func, *parts):
             for j in range(len(args2) - 1, -1, -1):
                 if args2[j] == _:
                     args2[j] = rest.pop()
-            return await func(*(args1 + rest + args2))
+            return await fn(*(args1 + rest + args2))
         return asy_partial
 
     def _partial(*args):
@@ -41,33 +41,33 @@ def __partial(func, *parts):
         for j in range(len(args2)-1, -1, -1):
             if args2[j] == _:
                 args2[j] = rest.pop()
-        return func(*(args1 + rest + args2))
+        return fn(*(args1 + rest + args2))
     return _partial
 _ = __partial
 _.partial = __partial
 
 
-def __go(seed, *funcs):
+def __go(seed, *fns):
     seed = seed() if _.is_func(seed) else seed
-    for func in funcs:
-        if func is __:
+    for fn in fns:
+        if fn is __:
             seed = __
         elif _.is_mr(seed):
-            seed = func(*seed.get('value'))
+            seed = fn(*seed['value'])
         else:
-            seed = func() if seed is __ else func(seed)
+            seed = fn() if seed is __ else fn(seed)
     return seed
 _.go = __go
 
 
-def __pipe(*funcs):
-    for func in funcs:
-        if _.is_asy(func):
+def __pipe(*fns):
+    for fn in fns:
+        if _.is_asy(fn):
             async def asy_pipe(*seed):
-                return await _.asy.go(seed[0] if len(seed) == 1 else _.mr(*seed), *funcs)
+                return await _.asy.go(seed[0] if len(seed) == 1 else _.mr(*seed), *fns)
             return asy_pipe
 
-    return lambda *seed: _.go(seed[0] if len(seed) == 1 else _.mr(*seed), *funcs)
+    return lambda *seed: _.go(seed[0] if len(seed) == 1 else _.mr(*seed), *fns)
 _.pipe = __ = __pipe
 
 
@@ -454,7 +454,6 @@ _.flatten = __flatten
 
 def __uniq(arr, iteratee=None):
     res, tmp, cmp = ([], [], _.map(arr, iteratee) if iteratee else arr)
-    # print(res, tmp, cmp)
     for i, v in enumerate(arr):
         if cmp[i] not in tmp:
             tmp.append(cmp[i])
@@ -689,11 +688,6 @@ def __is_list_or_tuple(o):
 _.is_list_or_tuple = __is_list_or_tuple
 
 
-def __to_mr(args):
-    return {'value': args, '_mr': True}
-_.mr_to = __to_mr
-
-
 def __find_i(arr, predicate=None):
     if predicate is None and _.is_func(arr):
         return _(_.find_i, _, arr)
@@ -866,7 +860,7 @@ _.is_match = _.isMatch = __is_match
 
 
 # Functions
-def __memoize(func, hasher=None):
+def __memoize(fn, hasher=None):
     if hasher is None:
         hasher = lambda x: x
     cache = {}
@@ -874,37 +868,37 @@ def __memoize(func, hasher=None):
     def memoized(key):
         address = hasher(key)
         if address not in cache:
-            cache[address] = func(address)
+            cache[address] = fn(address)
         return cache[address]
 
     return memoized
 _.memoize = __memoize
 
 
-def __delay(func, wait, *args):
+def __delay(fn, wait, *args):
     def call_it():
         if len(args) is 0:
-            return func()
+            return fn()
         else:
             if _.is_func(args[0]):
-                return func(args[0])
+                return fn(args[0])
             else:
-                return func(*args)
+                return fn(*args)
 
     Timer((float(wait)/float(1000)), call_it).start()
 _.delay = __delay
 
 
-def __defer(func, *args):
-    return _.delay(func, 1, *args)
+def __defer(fn, *args):
+    return _.delay(fn, 1, *args)
 _.defer = __defer
 
 
-def __retrn(func, *args):
-    return func() if len(args) == 0 else func(*args)
+def __retrn(fn, *args):
+    return fn() if len(args) == 0 else fn(*args)
 
 
-def __throttle(func, wait):
+def __throttle(fn, wait):
     previous = 0
     timeout = False
 
@@ -917,14 +911,14 @@ def __throttle(func, wait):
         def later():
             nonlocal timeout, result
             timeout = False
-            result = __retrn(func, *args)
+            result = __retrn(fn, *args)
 
         if remaining <= 0:
             if timeout is True:
                 going.cancel()
                 timeout = False
             previous = now
-            result = __retrn(func, *args)
+            result = __retrn(fn, *args)
         elif timeout is False:
             timeout = True
             going = Timer(remaining, later)
@@ -935,12 +929,12 @@ def __throttle(func, wait):
 _.throttle = __throttle
 
 
-def __debounce(func, wait):
+def __debounce(fn, wait):
     wait = float(wait)/float(1000)
 
     def debounced(*args):
         def call_it():
-            return __retrn(func, *args)
+            return __retrn(fn, *args)
         try:
             debounced.t.cancel()
         except:
@@ -952,17 +946,17 @@ def __debounce(func, wait):
 _.debounce = __debounce
 
 
-def __after(times, func):
+def __after(times, fn):
     def aftered(*args):
         nonlocal times
         times -= 1
         if times < 1:
-            return __retrn(func, *args)
+            return __retrn(fn, *args)
     return aftered
 _.after = __after
 
 
-def __before(times, func):
+def __before(times, fn):
     memo = None
 
     def befored(*args):
@@ -970,31 +964,36 @@ def __before(times, func):
         times -= 1
         if times < 0:
             return memo
-        memo = __retrn(func, *args)
+        memo = __retrn(fn, *args)
         return memo
     return befored
 _.before = __before
 
 
-def __once(func):
-    return _.before(1, func)
+def __once(fn):
+    return _.before(1, fn)
 _.once = __once
 
 
 # Utilities
-def __is_async(func):
-    return asyncio.iscoroutinefunction(func)
+def __is_async(fn):
+    return asyncio.iscoroutinefunction(fn)
 _.is_asy = _.is_async = __is_async
 
 
-def __is_mr(*o):
-    return type(o[0]) is dict and o[0].get('_mr')
+def __is_mr(o, *r):
+    return type(o) is dict and o.get('_mr')
 _.is_mr = __is_mr
 
 
 def __mr(*args):
     return {'value': args, '_mr': True}
 _.mr = __mr
+
+
+def __to_mr(arg):
+    return {'value': arg, '_mr': True}
+_.to_mr = __to_mr
 
 
 def __tap(*fns):
@@ -1006,7 +1005,30 @@ def __tap(*fns):
     return tap
 _.tap = __tap
 
+
 _.hi = _.tap(print)
+
+
+def __all(*args):
+    fns = _.last(args)
+    if _.is_list(fns):
+        return _.all2(*[_.to_mr(_.initial(args))] + fns)
+    fns = list(args)
+    return lambda *vals: _.all2(*[_.to_mr(vals)] + fns)
+_.all = __all
+
+
+def __all2(arg, *fns):
+    res = []
+    for fn in fns:
+        tmp = fn(*arg['value']) if _.is_mr(arg) else fn(arg)
+        if _.is_mr(tmp):
+            for v in tmp:
+                res.append(v)
+        else:
+            res.append(tmp)
+    return _.to_mr(res)
+_.all2 = __all2
 
 
 # Async Series
@@ -1014,28 +1036,28 @@ def __asy(): pass
 _.asy = __asy
 
 
-async def __asy_go(seed, *funcs):
+async def __asy_go(seed, *fns):
     if _.is_func(seed):
         seed = await seed() if _.is_asy(seed) else seed()
     if asyncio.iscoroutine(seed):
         seed = await seed
 
-    for func in funcs:
-        if func is __:
+    for fn in fns:
+        if fn is __:
             seed = __
-        elif asyncio.iscoroutinefunction(func):
-            seed = await func(*seed.get('value')) if _.is_mr(seed) else await func(seed)
+        elif asyncio.iscoroutinefunction(fn):
+            seed = await fn(*seed['value']) if _.is_mr(seed) else await fn(seed)
         else:
-            seed = func(*seed.get('value')) if _.is_mr(seed) else func() if seed is __ else func(seed)
+            seed = fn(*seed['value']) if _.is_mr(seed) else fn() if seed is __ else fn(seed)
             if asyncio.iscoroutine(seed):
                 seed = await seed
     return seed
 _.asy.go = __asy_go
 
 
-def __asy_pipe(*funcs):
+def __asy_pipe(*fns):
     async def asy_pipe(*seed):
-        return await _.asy.go(seed[0] if len(seed) == 1 else _.mr(*seed), *funcs)
+        return await _.asy.go(seed[0] if len(seed) == 1 else _.mr(*seed), *fns)
 
     return asy_pipe
 _.asy.pipe = __asy_pipe
