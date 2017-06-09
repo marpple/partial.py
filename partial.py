@@ -1031,6 +1031,13 @@ def __all2(arg, *fns):
 _.all2 = __all2
 
 
+def __spread(*fns):
+    def spread(*args):
+        return _.mr(*[fns[i](v) for i, v in enumerate(args)])
+    return spread
+_.spread = __spread
+
+
 # Async Series
 def __asy(): pass
 _.asy = __asy
