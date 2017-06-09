@@ -691,7 +691,7 @@ _.is_list_or_tuple = __is_list_or_tuple
 
 def __to_mr(args):
     return {'value': args, '_mr': True}
-_.mr_to = __to_mr
+_.to_mr = __to_mr
 
 
 def __find_i(arr, predicate=None):
@@ -1008,6 +1008,11 @@ _.tap = __tap
 
 _.hi = _.tap(print)
 
+def __spread(*fns):
+    def spread(*args):
+        return _.mr(*[fns[i](v) for i, v in enumerate(args)])
+    return spread
+_.spread = __spread
 
 # Async Series
 def __asy(): pass
