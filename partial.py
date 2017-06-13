@@ -329,7 +329,7 @@ _.sort_by = _.sortBy = __sort_by
 def __group_by(data, iteratee=lambda x, *r: x):
     if _.is_func(data) or type(data) is str:
         return _(_.group_by, _, data)
-    iter = iteratee if _.is_func(iteratee) else lambda o: o[iteratee]
+    iter = iteratee if _.is_func(iteratee) else lambda o, *r: o[iteratee]
     res, arr = ({}, _.map(data, iter))
     for i, v in enumerate(arr):
         if _.has(res, v):
@@ -343,7 +343,7 @@ _.group_by = _.groupBy = __group_by
 def __index_by(data, iteratee=lambda x, *r: x):
     if _.is_func(data) or type(data) is str:
         return _(_.index_by, _, data)
-    iter = iteratee if _.is_func(iteratee) else lambda o: o[iteratee]
+    iter = iteratee if _.is_func(iteratee) else lambda o, *r: o[iteratee]
     res, arr = ({}, _.map(data, iter))
     for i, v in enumerate(arr):
         res[v] = data[i]
@@ -354,7 +354,7 @@ _.index_by = _.indexBy = __index_by
 def __count_by(data, iteratee=lambda x, *r: x):
     if _.is_func(data) or type(data) is str:
         return _(_.count_by, _, data)
-    iter = iteratee if _.is_func(iteratee) else lambda o: o[iteratee]
+    iter = iteratee if _.is_func(iteratee) else lambda o, *r: o[iteratee]
     res, arr = ({}, _.map(data, iter))
     for i, v in enumerate(arr):
         try:
@@ -534,38 +534,48 @@ def __object(arr, vals=None):
 _.object = __object
 
 
-def __sorted_i(data, obj, iteratee=lambda x, *r: x):
-    if _.is_func(data):
+def __sorted_i(data, obj=None, iteratee=lambda x, *r: x):
+    if obj is None:
         return _(_.sorted_i, _, _, data)
-
-    value, low, high = (iteratee(obj), 0, len(data))
+    iter = lambda o, *r: o[iteratee] if _.is_str(iteratee) else iteratee
+    value, low, high = (iter(obj), 0, len(data))
     while low < high:
         mid = (low + high) // 2
-        if iteratee(data[mid]) < value:
+        if iter(data[mid]) < value:
             low = mid + 1
         else:
             high = mid
     return low
-_.sort_i = _.sortedIndex = _.sorted_index = __sorted_i
+_.sorted_i = _.sortedIndex = _.sorted_index = __sorted_i
 
 
-def __find_i(arr, predicate=lambda x, *r: x):
-    if _.is_func(arr):
+def __find_i(arr, predicate=None):
+    if not _.is_list(arr) and predicate is None:
         return _(_.find_i, ___, arr)
 
+    if predicate is None:
+        predi = _.idtt
+    elif _.is_dict(predicate):
+        predi = _.const(predicate)
+
     for i, v in enumerate(arr):
-        if predicate(v, i, arr):
+        if predi(v, i, arr):
             return i
     return -1
 _.find_i = _.findIndex = _.find_index = __find_i
 
 
-def __find_last_i(arr, predicate=lambda x, *r: x):
-    if _.is_func(arr):
-        return _(_.find_i, ___, arr)
+def __find_last_i(arr, predicate=None):
+    if not _.is_list(arr) and predicate is None:
+        return _(_.find_last_i, ___, arr)
+
+    if predicate is None:
+        predi = _.idtt
+    elif _.is_dict(predicate):
+        predi = _.const(predicate)
 
     for i in range(len(arr)-1, -1, -1):
-        if predicate(arr[i], i, arr):
+        if predi(arr[i], i, arr):
             return i
     return -1
 _.find_last_i = _.findLastIndex = _.find_last_index = __find_last_i
