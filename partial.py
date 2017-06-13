@@ -26,10 +26,10 @@ def __partial(fn, *parts):
             args1, args2, rest = (parts1[:], parts2[:], list(args))
             for j in range(len(args1)):
                 if args1[j] == _:
-                    args1[j] = rest.pop(0)
+                    args1[j], rest = _.shift(rest)
             for j in range(len(args2) - 1, -1, -1):
                 if args2[j] == _:
-                    args2[j] = rest.pop()
+                    args2[j], rest = _.pop(rest)
             return await fn(*(args1 + rest + args2))
         return asy_partial
 
@@ -37,10 +37,10 @@ def __partial(fn, *parts):
         args1, args2, rest = (parts1[:], parts2[:], list(args))
         for j in range(len(args1)):
             if args1[j] == _:
-                args1[j] = rest.pop(0)
+                args1[j], rest = _.shift(rest)
         for j in range(len(args2)-1, -1, -1):
             if args2[j] == _:
-                args2[j] = rest.pop()
+                args2[j], rest = _.pop(rest)
         return fn(*(args1 + rest + args2))
     return _partial
 _ = __partial
@@ -404,29 +404,32 @@ _.partition = __partition
 
 
 # Arrays
-def __first(arr, n=None):
-    if n is None:
+def __first(arr, n=None, guard=None):
+    if n is None or guard:
         return arr[0]
     return arr[0:n]
 _.first = _.head = _.take = __first
 
 
-def __initial(arr, n=1):
-    if n is 0:
+def __initial(arr, n=None, guard=None):
+    if guard or n is None:
+        return arr[0:-1]
+    elif n is 0:
         return arr[0:]
     else:
         return arr[0:-n]
 _.initial = __initial
 
 
-def __last(arr, n=None):
-    if n is None:
+def __last(arr, n=None, guard=None):
+    if n is None or guard:
         return arr[-1]
     return arr[-n:]
 _.last = __last
 
 
-def __rest(arr, n=1):
+def __rest(arr, n=1, guard=None):
+    if guard: n = 1
     return arr[n:len(arr)]
 _.rest = _.tail = _.drop = __rest
 
@@ -598,6 +601,24 @@ def __range(start, stop=None, step=None):
         return list(range(start, stop))
     return list(range(start, stop, step))
 _.range = __range
+
+
+def __pop(arr):
+    res = arr[:]
+    try:
+        return (res.pop(), res)
+    except:
+        return (None, res)
+_.pop = __pop
+
+
+def __shift(arr):
+    res = arr[:]
+    try:
+        return (res.pop(0), res)
+    except:
+        return (None, res)
+_.shift = __shift
 
 
 # Utility
@@ -1015,7 +1036,7 @@ def __all(*args):
         return _.all2(*[_.to_mr(_.initial(args))] + fns)
     fns = list(args)
     return lambda *argv: _.all2(*[_.to_mr(argv)] + fns)
-_.all = __all
+_.all = _.share = __all
 
 
 def __all2(arg, *fns):
