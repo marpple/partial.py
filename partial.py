@@ -673,9 +673,9 @@ def __is_function(o, *r):
 _.is_func = _.isFunction = _.is_function = __is_function
 
 
-def __is_dictionary(o, *r):
+def __is_dict(o, *r):
     return type(o) is dict
-_.is_dict = _.isDictionary = _.is_dictionary = __is_dictionary
+_.is_dict = _.isDict = __is_dict
 
 
 def __is_list(o, *r):
@@ -998,7 +998,7 @@ def __before(times, fn):
     def befored(*args):
         nonlocal times, memo
         times -= 1
-        if times < 0:
+        if times < 1:
             return memo
         memo = __retrn(fn, *args)
         return memo
@@ -1007,11 +1007,14 @@ _.before = __before
 
 
 def __once(fn):
-    return _.before(1, fn)
+    return _.before(2, fn)
 _.once = __once
 
 
 # Utilities
+_.bool = lambda v, *r: bool(v)
+
+
 def __is_async(fn):
     return asyncio.iscoroutinefunction(fn)
 _.is_asy = _.is_async = __is_async

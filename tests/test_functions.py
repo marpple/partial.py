@@ -16,65 +16,65 @@ class TestStructure(unittest.TestCase):
     # def test_bindAll(self):
     #     pass
     #
-    # def test_memoize(self):
-    #     def fib(n):
-    #         return n if n < 2 else fib(n - 1) + fib(n - 2)
-    #
-    #     fastFib = _.memoize(fib)
-    #     self.assertEqual(
-    #         fib(10), 55, 'a memoized version of fibonacci'
-    #                      ' produces identical results')
-    #     self.assertEqual(
-    #         fastFib(10), 55, 'a memoized version of fibonacci'
-    #         ' produces identical results')
-    #     self.assertEqual(
-    #         fastFib(10), 55, 'a memoized version of fibonacci'
-    #         ' produces identical results')
-    #     self.assertEqual(
-    #         fastFib(10), 55, 'a memoized version of fibonacci'
-    #         ' produces identical results')
-    #
-    #     def o(str):
-    #         return str
-    #
-    #     fastO = _.memoize(o)
-    #     self.assertEqual(o('upper'), 'upper', 'checks hasOwnProperty')
-    #     self.assertEqual(fastO('upper'), 'upper', 'checks hasOwnProperty')
-    #
-    # def test_delay(self):
-    #     abc = False
-    #
-    #     def func():
-    #         nonlocal abc
-    #         abc =True
-    #
-    #     _.delay(func, 150)
-    #
-    #     def checkFalse():
-    #         self.assertFalse(abc)
-    #         print("\nASYNC: delay. OK")
-    #
-    #     def checkTrue():
-    #         self.assertTrue(abc)
-    #         print("\nASYNC: delay. OK")
-    #
-    #     Timer(0.05, checkFalse).start()
-    #     Timer(0.20, checkTrue).start()
-    # #
-    # def test_defer(self):
-    #     ddd = False
-    #
-    #     def defertTest(bool):
-    #         ddd = bool
-    #
-    #     _.defer(defertTest, True)
-    #
-    #     def deferCheck():
-    #         self.assertTrue(True, "deferred the function")
-    #         print("\nASYNC: defer. OK")
-    #
-    #     _.delay(deferCheck, 50)
-    #
+    def test_memoize(self):
+        def fib(n):
+            return n if n < 2 else fib(n - 1) + fib(n - 2)
+
+        fastFib = _.memoize(fib)
+        self.assertEqual(
+            fib(10), 55, 'a memoized version of fibonacci'
+                         ' produces identical results')
+        self.assertEqual(
+            fastFib(10), 55, 'a memoized version of fibonacci'
+            ' produces identical results')
+        self.assertEqual(
+            fastFib(10), 55, 'a memoized version of fibonacci'
+            ' produces identical results')
+        self.assertEqual(
+            fastFib(10), 55, 'a memoized version of fibonacci'
+            ' produces identical results')
+
+        def o(str):
+            return str
+
+        fastO = _.memoize(o)
+        self.assertEqual(o('upper'), 'upper', 'checks hasOwnProperty')
+        self.assertEqual(fastO('upper'), 'upper', 'checks hasOwnProperty')
+
+    def test_delay(self):
+        abc = False
+
+        def func():
+            nonlocal abc
+            abc = True
+
+        _.delay(func, 150)
+
+        def checkFalse():
+            self.assertFalse(abc)
+            print("\nASYNC: delay. OK")
+
+        def checkTrue():
+            self.assertTrue(abc)
+            print("\nASYNC: delay. OK")
+
+        Timer(0.05, checkFalse).start()
+        Timer(0.20, checkTrue).start()
+
+    def test_defer(self):
+        ddd = False
+
+        def defertTest(bool):
+            ddd = bool
+
+        _.defer(defertTest, True)
+
+        def deferCheck():
+            self.assertTrue(True, "deferred the function")
+            print("\nASYNC: defer. OK")
+
+        _.delay(deferCheck, 50)
+
     # def test_throttle(self):
     #     abc = 0
     #
@@ -99,7 +99,7 @@ class TestStructure(unittest.TestCase):
     #         print("ASYNC: throttle. OK")
     #
     #     def checkCounter2():
-    #         self.assertEqual(abc, 4, "incr was throttledfffff")
+    #         self.assertEqual(abc, 4, "incr was throttled")
     #         print("ASYNC: throttle. OK")
     #
     #     _.delay(checkCounter1, 90)
@@ -174,33 +174,33 @@ class TestStructure(unittest.TestCase):
     #
     #     self.assertEqual('HI: MOE!', composed_function('moe'),
     #                      'can compose a function that takes another')
-    #
-    # def test_after(self):
-    #
-    #     con = None
-    #     def testAfter(afterAmount, timesCalled):
-    #         nonlocal con
-    #         con = 0
-    #
-    #         def afterFunc():
-    #             nonlocal con
-    #             con += 1
-    #
-    #         after = _.after(afterAmount, afterFunc)
-    #
-    #         while (timesCalled):
-    #             after()
-    #             timesCalled -= 1
-    #
-    #         return con
-    #
-    #     self.assertEqual(testAfter(5, 5), 1,
-    #                      "after(N) should fire after being called N times")
-    #     self.assertEqual(testAfter(5, 4), 0,
-    #                      "after(N) should not fire unless called N times")
-    #     self.assertEqual(testAfter(0, 1), 1,
-    #                      "after(0) should fire immediately")
-    #
+
+    def test_after(self):
+
+        con = None
+        def testAfter(afterAmount, timesCalled):
+            nonlocal con
+            con = 0
+
+            def afterFunc():
+                nonlocal con
+                con += 1
+
+            after = _.after(afterAmount, afterFunc)
+
+            while (timesCalled):
+                after()
+                timesCalled -= 1
+
+            return con
+
+        self.assertEqual(testAfter(5, 5), 1,
+                         "after(N) should fire after being called N times")
+        self.assertEqual(testAfter(5, 4), 0,
+                         "after(N) should not fire unless called N times")
+        self.assertEqual(testAfter(0, 1), 1,
+                         "after(0) should fire immediately")
+
 
     def test_partial(self):
         func = _.partial(lambda *args: args, _, 10, ___, _, 100, _, 300)

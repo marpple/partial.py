@@ -14,10 +14,10 @@ class TestObjects(unittest.TestCase):
         self.assertEqual(set(_.values({"one": 1, "two": 2})),
                          {2, 1}, 'can extract the values from an object')
 
-    # def test_functions(self):
-    #     obj = {"a": 'dash', "b": _.map, "c": ("/yo/"), "d": _.reduce}
-    #     self.assertEqual(['b', 'd'], _.functions(obj),
-    #                      'can grab the function names of any passed-in object')
+    def test_functions(self):
+        obj = {"a": 'dash', "b": _.map, "c": ("/yo/"), "d": _.reduce}
+        self.assertEqual(['b', 'd'], _.functions(obj),
+                         'can grab the function names of any passed-in object')
 
     def test_extend(self):
 
