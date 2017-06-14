@@ -537,7 +537,7 @@ _.object = __object
 def __sorted_i(data, obj=None, iteratee=lambda x, *r: x):
     if obj is None:
         return _(_.sorted_i, _, _, data)
-    iter = lambda o, *r: o[iteratee] if _.is_str(iteratee) else iteratee
+    iter = (lambda o, *r: o[iteratee]) if _.is_str(iteratee) else iteratee
     value, low, high = (iter(obj), 0, len(data))
     while low < high:
         mid = (low + high) // 2
@@ -813,6 +813,11 @@ def __invert(obj):
 _.invert = __invert
 
 
+def __functions(obj):
+    return sorted([k for i, k in enumerate(obj) if callable(obj[k])])
+_.functions = __functions
+
+
 def __has(obj, *keys):
     for key in keys:
         try:
@@ -849,9 +854,9 @@ def __pick(obj, *keys):
     if len(keys) is 0:
         return _(_.pick, _, obj)
     if _.is_func(keys[0]):
-        return {key: obj[key] for key in obj if key[0](obj[key], key, obj)}
+        return {k: obj[k] for k in obj if keys[0](obj[k], k, obj)}
     else:
-        return {key: obj[key] for key in _.flatten(keys)}
+        return {k: obj[k] for k in _.flatten(keys)}
 _.pick = __pick
 
 
@@ -860,14 +865,14 @@ def __omit(obj, *keys):
         return _(_.omit, _, obj)
     res = obj.copy()
     if _.is_func(keys[0]):
-        for key in obj:
-            if keys[0](obj[key], key, obj):
-                del res[key]
+        for k in obj:
+            if keys[0](obj[k], k, obj):
+                del res[k]
     else:
         flat = _.flatten(keys)
-        for key in flat:
-            if res[key]:
-                del res[key]
+        for k in flat:
+            if res[k]:
+                del res[k]
     return res
 _.omit = __omit
 
