@@ -937,18 +937,19 @@ def __retrn(fn, *args):
 def __throttle(fn, wait):
     previous = 0
     timeout = False
+    result = going = None
+    argss = None
+    def later():
+        nonlocal timeout, result, previous
+        timeout = False
+        previous = time.time()
+        result = __retrn(fn, *argss)
 
     def throttled(*args):
-        nonlocal previous, timeout
-        result = going = None
+        nonlocal previous, timeout, result, going, argss
+        argss = args
         now = time.time()
         remaining = wait - (now - previous)
-
-        def later():
-            nonlocal timeout, result
-            timeout = False
-            result = __retrn(fn, *args)
-
         if remaining <= 0:
             if timeout is True:
                 going.cancel()
