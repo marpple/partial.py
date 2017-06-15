@@ -1077,6 +1077,8 @@ def __spread(*fns):
     return spread
 _.spread = __spread
 
+def _1(arg):
+    return lambda v, *i: arg(v)
 
 # Async Series
 def __asy(): pass
