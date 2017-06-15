@@ -1,4 +1,4 @@
-# Partial.py 0.1.1
+# Partial.py 0.1.2
 # Project Lead - Indong Yoo
 # Maintainers - Jeongik Park, Joeun Ha
 # (c) 2017 Marpple. MIT Licensed.
@@ -195,7 +195,7 @@ _.findWhere = _.findWhere = __find_where
 
 def __reject(data, predicate=None):
     if predicate is None and _.is_func(data):
-        return _(_.asy.reject if _.is_asy(data) else _.filter, _, data)
+        return _(_.asy.reject if _.is_asy(data) else _.reject, _, data)
     if _.is_asy(predicate):
         return _.asy.reject(data, predicate)
     res = []
@@ -405,6 +405,8 @@ _.partition = __partition
 
 # Arrays
 def __first(arr, n=None, guard=None):
+    if _.is_num(arr):
+        return _(_.first, _, arr)
     if n is None or guard:
         return arr[0]
     return arr[0:n]
@@ -412,6 +414,8 @@ _.first = _.head = _.take = __first
 
 
 def __initial(arr, n=None, guard=None):
+    if _.is_num(arr):
+        return _(_.initial, _, arr)
     if guard or n is None:
         return arr[0:-1]
     elif n is 0:
@@ -422,6 +426,8 @@ _.initial = __initial
 
 
 def __last(arr, n=None, guard=None):
+    if _.is_num(arr):
+        return _(_.last, _, arr)
     if n is None or guard:
         return arr[-1]
     return arr[-n:]
@@ -429,6 +435,8 @@ _.last = __last
 
 
 def __rest(arr, n=1, guard=None):
+    if _.is_num(arr):
+        return _(_.rest, _, arr)
     if guard: n = 1
     return arr[n:len(arr)]
 _.rest = _.tail = _.drop = __rest

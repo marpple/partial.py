@@ -7,7 +7,7 @@ with open('README.rst') as rm:
 
 setup_kwargs = {
       'name': 'partial.py',
-      'version': '0.1.1',
+      'version': '0.1.2',
       'description': 'Functional Python Library',
       'long_description': long_description,
       'url': 'https://github.com/marpple/partial.py',
