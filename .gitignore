@@ -3,3 +3,5 @@
 local_test/*
 __pycache__/*
 partial.pyc
+partial.py.egg-info/*
+dist/*
