@@ -1,7 +1,7 @@
 import unittest
-# from unittesthelper import init
-# init()  # will let you import modules from upper folder
-from partial import _, __, ___
+from unittesthelper import init
+init()  # will let you import modules from upper folder
+from src.partial import _, __, ___
 from threading import Timer
 
 
@@ -75,35 +75,35 @@ class TestStructure(unittest.TestCase):
 
         _.delay(deferCheck, 50)
 
-    # def test_throttle(self):
-    #     abc = 0
-    #
-    #     def incr():
-    #         nonlocal abc
-    #         print(abc)
-    #         abc += 1
-    #
-    #     throttledIncr = _.throttle(incr, 0.1)
-    #     throttledIncr()
-    #     throttledIncr()
-    #     throttledIncr()
-    #     Timer(0.07, throttledIncr).start()
-    #     Timer(0.12, throttledIncr).start()
-    #     Timer(0.14, throttledIncr).start()
-    #     Timer(0.19, throttledIncr).start()
-    #     Timer(0.22, throttledIncr).start()
-    #     Timer(0.34, throttledIncr).start()
-    #     #
-    #     def checkCounter1():
-    #         self.assertEqual(abc, 1, "incr was called immediately")
-    #         print("ASYNC: throttle. OK")
-    #
-    #     def checkCounter2():
-    #         self.assertEqual(abc, 4, "incr was throttled")
-    #         print("ASYNC: throttle. OK")
-    #
-    #     _.delay(checkCounter1, 90)
-    #     _.delay(checkCounter2, 400)
+    def test_throttle(self):
+        abc = 0
+
+        def incr():
+            nonlocal abc
+            print(abc)
+            abc += 1
+
+        throttledIncr = _.throttle(incr, 0.1)
+        throttledIncr()
+        throttledIncr()
+        throttledIncr()
+        Timer(0.07, throttledIncr).start()
+        Timer(0.12, throttledIncr).start()
+        Timer(0.14, throttledIncr).start()
+        Timer(0.19, throttledIncr).start()
+        Timer(0.22, throttledIncr).start()
+        Timer(0.34, throttledIncr).start()
+        #
+        def checkCounter1():
+            self.assertEqual(abc, 1, "incr was called immediately")
+            print("ASYNC: throttle. OK")
+
+        def checkCounter2():
+            self.assertEqual(abc, 4, "incr was throttled")
+            print("ASYNC: throttle. OK")
+
+        _.delay(checkCounter1, 90)
+        _.delay(checkCounter2, 400)
 
     def test_debounce(self):
         con = 0

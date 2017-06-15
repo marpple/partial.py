@@ -5,3 +5,4 @@ __pycache__/*
 partial.pyc
 partial.py.egg-info/*
 dist/*
+README.rst

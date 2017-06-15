@@ -1,7 +1,7 @@
 import unittest
 from unittesthelper import init
 init()  # will let you import modules from upper folder
-from partial import _
+from src.partial import _, __, ___
 
 
 class TestCollections(unittest.TestCase):
