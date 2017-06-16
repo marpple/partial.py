@@ -1,4 +1,4 @@
-# Partial.py 0.1.2
+# Partial.py 0.1.3
 # Project Lead - Indong Yoo
 # Maintainers - Jeongik Park, Joeun Ha
 # (c) 2017 Marpple. MIT Licensed.
@@ -24,22 +24,22 @@ def __partial(fn, *parts):
     if _.is_asy(fn):
         async def asy_partial(*args):
             args1, args2, rest = (parts1[:], parts2[:], list(args))
-            for j in range(len(args1)):
-                if args1[j] == _:
+            for j, v in enumerate(args1):
+                if v == _:
                     args1[j], rest = _.shift(rest)
-            for j in range(len(args2) - 1, -1, -1):
-                if args2[j] == _:
+            for j, v in reversed(list(enumerate(args2))):
+                if v == _:
                     args2[j], rest = _.pop(rest)
             return await fn(*(args1 + rest + args2))
         return asy_partial
 
     def _partial(*args):
         args1, args2, rest = (parts1[:], parts2[:], list(args))
-        for j in range(len(args1)):
-            if args1[j] == _:
+        for j, v in enumerate(args1):
+            if v == _:
                 args1[j], rest = _.shift(rest)
-        for j in range(len(args2)-1, -1, -1):
-            if args2[j] == _:
+        for j, v in reversed(list(enumerate(args2))):
+            if v == _:
                 args2[j], rest = _.pop(rest)
         return fn(*(args1 + rest + args2))
     return _partial
@@ -49,13 +49,12 @@ _.partial = __partial
 
 def __go(seed, *fns):
     seed = seed() if _.is_func(seed) else seed
-    lazys = []
+    lazys, fl = ([], len(fns))
     for i, fn in enumerate(fns):
-
         if hasattr(fn, '_p_go_lazy'):
             lazys.append(fn)
-            p_i = i+1
-            if len(fns) == p_i or hasattr(fns[p_i], '_p_go_lazy') is False or hasattr(fn, '_p_lze'):
+            p_i = i + 1
+            if fl == p_i or hasattr(fns[p_i], '_p_go_lazy') is False or hasattr(fn, '_p_lze'):
                 seed = fn._p_go_lazy(lazys, seed)
         elif fn is __:
             seed = __
@@ -646,24 +645,6 @@ def __shift(arr):
 _.shift = __shift
 
 
-# Utility
-def __identity(v, *r):
-    return v
-_.identity = _.idtt = __identity
-
-
-def __always(v, *r):
-    return lambda *args: v
-_.always = _.const = __always
-
-
-def __random(min_num, max_num=None):
-    if max_num is None:
-        max_num = min_num
-        min_num = 0
-    return random.randrange(min_num, max_num)
-
-
 # Objects
 def __is_equal(obj1, obj2=None):
     if obj2 is None:
@@ -954,6 +935,7 @@ def __throttle(fn, wait):
     timeout = False
     result = going = None
     argss = None
+
     def later():
         nonlocal timeout, result, previous
         timeout = False
@@ -1028,6 +1010,44 @@ _.once = __once
 
 
 # Utilities
+def _1(*args):
+    if _.is_func(args[0]):
+        return lambda *a: args[0](a[0])
+    return args[0]
+_.args0 = _1
+
+
+def _2(*args):
+    if _.is_func(args[0]):
+        return lambda *a: args[0](a[0], a[1])
+    return args[1]
+_.args1 = _2
+
+
+def _3(*args):
+    if _.is_func(args[0]):
+        return lambda *a: args[0](a[0], a[1], a[3])
+    return args[2]
+_.args2 = _3
+
+
+def __identity(v, *r):
+    return v
+_.identity = _.idtt = __identity
+
+
+def __always(v, *r):
+    return lambda *args: v
+_.always = _.const = __always
+
+
+def __random(min_num, max_num=None):
+    if max_num is None:
+        max_num = min_num
+        min_num = 0
+    return random.randrange(min_num, max_num)
+
+
 _.bool = lambda v, *r: bool(v)
 
 
@@ -1091,10 +1111,6 @@ def __spread(*fns):
         return _.mr(*[fns[i](v) for i, v in enumerate(args)])
     return spread
 _.spread = __spread
-
-
-def _1(arg):
-    return lambda v, *i: arg(v)
 
 
 # Async Series
@@ -1270,13 +1286,7 @@ async def __asy_some(data, predicate=lambda x, *r: x):
 _.asy.some = __asy_some
 
 
-def __take (num):
-    def _take(seed):
-        return seed[0:num]
-    return _take
-_.take = __take
-
-
+# Lazy Series
 def L(): pass
 
 
@@ -1288,8 +1298,7 @@ def go_lazy(lazys, data):
             return go_strict(lazys, data)
     print('go lazy')
     for i, v in enumerate(data):
-        memo = v
-        breaked = False
+        memo, breaked = (v, False)
         for fn in lazys:
             evaled = fn(memo)
             if hasattr(fn, '_p_lzt_m'):
@@ -1304,13 +1313,10 @@ def go_lazy(lazys, data):
 
 
 def go_lazy_t(lazys, data):
-    res = []
-    limit = _.last(lazys).limit
-
+    res, limit = ([], lazys.pop().limit)
     for i, v in enumerate(data):
-        memo = v
-        breaked = False
-        for fn in _.initial(lazys):
+        memo, breaked = (v, False)
+        for fn in lazys:
             evaled = fn(memo)
             if hasattr(fn, '_p_lzt_m'):
                 memo = evaled
@@ -1326,11 +1332,9 @@ def go_lazy_t(lazys, data):
 
 
 def go_lazy_fi(lazys, data):
-    # res = []
-    ender = _.last(lazys)
+    ender = lazys[-1]
     for i, v in enumerate(data):
-        memo = v
-        breaked = False
+        memo, breaked = (v, False)
         for fn in lazys:
             evaled = fn(memo)
             if hasattr(fn, '_p_lzt_m'):
@@ -1345,11 +1349,10 @@ def go_lazy_fi(lazys, data):
 
 
 def go_lazy_s(lazys, data):
-    ender = _.last(lazys)
+    ender = lazys.pop()
     for i, v in enumerate(data):
-        memo = v
-        breaked = False
-        for fn in _.initial(lazys):
+        memo, breaked = (v, False)
+        for fn in lazys:
             evaled = fn(memo)
             if hasattr(fn, '_p_lzt_m'):
                 memo = evaled
@@ -1364,12 +1367,10 @@ def go_lazy_s(lazys, data):
 
 
 def go_lazy_e(lazys, data):
-    ender = _.last(lazys)
-
+    ender = lazys.pop()
     for i, v in enumerate(data):
-        memo = v
-        breaked = False
-        for fn in _.initial(lazys):
+        memo, breaked = (v, False)
+        for fn in lazys:
             evaled = fn(memo)
             if hasattr(fn, '_p_lzt_m'):
                 memo = evaled
@@ -1399,7 +1400,8 @@ def go_strict(lazys, data):
 
     return _.go(data, *_.map(_.rest(lazys), _strict_li))
 
-def __Lmap (iter):
+
+def __Lmap(iter):
     iter._p_lzne = iter._p_lzt_m = True
     iter._p_go_lazy = go_lazy
     return iter
@@ -1421,7 +1423,7 @@ def __Lreject(_iter):
 L.reject = __Lreject
 
 
-def __Lfind (iter):
+def __Lfind(iter):
     iter._p_lze = iter._p_lzt_fi = True
     iter._p_go_lazy = go_lazy_fi
     return iter
@@ -1442,7 +1444,7 @@ def __Levery(iter):
 L.every = __Levery
 
 
-def __Ltake (limit):
+def __Ltake(limit):
     def a(): pass
     a._p_go_lazy = go_lazy_t
     a._p_lze = a._p_lzt_t = True
