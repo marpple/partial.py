@@ -6,3 +6,4 @@ partial.pyc
 partial.py.egg-info/*
 dist/*
 README.rst
+jip_test.py

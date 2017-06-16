@@ -49,8 +49,14 @@ _.partial = __partial
 
 def __go(seed, *fns):
     seed = seed() if _.is_func(seed) else seed
-    for fn in fns:
-        if fn is __:
+    lazys = []
+    for i, fn in enumerate(fns):
+        if hasattr(fn, '_p_go_lazy'):
+            lazys.append(fn)
+            p_i = i+1
+            if len(fns) == p_i or hasattr(fns[p_i], '_p_go_lazy') is False or hasattr(fn, '_p_lze'):
+                seed = fn._p_go_lazy(lazys, seed)
+        elif fn is __:
             seed = __
         elif _.is_mr(seed):
             seed = fn(*seed['value'])
@@ -1085,8 +1091,10 @@ def __spread(*fns):
     return spread
 _.spread = __spread
 
+
 def _1(arg):
     return lambda v, *i: arg(v)
+
 
 # Async Series
 def __asy(): pass
@@ -1259,6 +1267,160 @@ async def __asy_some(data, predicate=lambda x, *r: x):
                 return True
     return False
 _.asy.some = __asy_some
+
+
+def L(): pass
+
+
+def go_lazy(lazys, data):
+    res = []
+    for i, v in enumerate(data):
+        memo = v
+        breaked = False
+        for fn in lazys:
+            evaled = fn(memo)
+            if hasattr(fn, '_p_lzt_m'):
+                memo = evaled
+            elif evaled is False:
+                breaked = True
+                break
+        if breaked:
+            continue
+        res.append(memo)
+    return res
+
+
+def go_lazy_t(lazys, data):
+    res = []
+    limit = _.last(lazys).limit
+    lazys.pop()
+    for i, v in enumerate(data):
+        memo = v
+        breaked = False
+        for fn in lazys:
+            evaled = fn(memo)
+            if hasattr(fn, '_p_lzt_m'):
+                memo = evaled
+            elif evaled is False:
+                breaked = True
+                break
+        if breaked:
+            continue
+        res.append(memo)
+        if len(res) == limit:
+            break
+    return res
+
+
+def go_lazy_fi(lazys, data):
+    # res = []
+    ender = _.last(lazys)
+    for i, v in enumerate(data):
+        memo = v
+        breaked = False
+        for fn in lazys:
+            evaled = fn(memo)
+            if hasattr(fn, '_p_lzt_m'):
+                memo = evaled
+            elif evaled is False:
+                breaked = True
+                break
+        if breaked:
+            continue
+        if ender(memo):
+            return memo
+
+
+def go_lazy_s(lazys, data):
+    ender = _.last(lazys)
+    lazys.pop()
+    for i, v in enumerate(data):
+        memo = v
+        breaked = False
+        for fn in lazys:
+            evaled = fn(memo)
+            if hasattr(fn, '_p_lzt_m'):
+                memo = evaled
+            elif evaled is False:
+                breaked = True
+                break
+        if breaked:
+            continue
+        if ender(memo):
+            return True
+    return False
+
+
+def go_lazy_e(lazys, data):
+    ender = _.last(lazys)
+    lazys.pop()
+    for i, v in enumerate(data):
+        memo = v
+        breaked = False
+        for fn in lazys:
+            evaled = fn(memo)
+            if hasattr(fn, '_p_lzt_m'):
+                memo = evaled
+            elif evaled is False:
+                breaked = True
+                break
+        if breaked:
+            continue
+        if ender(memo) is False:
+            return False
+    return True
+
+
+def __Lmap (iter):
+    iter._p_lzne = True
+    iter._p_go_lazy = go_lazy
+    return iter
+L.map = __Lmap
+
+
+def __Lfilter(iter):
+    iter._p_lzne = True
+    iter._p_go_lazy = go_lazy
+    return iter
+L.filter = __Lfilter
+
+
+def __Lreject(_iter):
+    iter = _.negate(_iter)
+    iter._p_lzne = True
+    iter._p_go_lazy = go_lazy
+    return iter
+L.reject = __Lreject
+
+
+def __Lfind (iter):
+    iter._p_lze = iter._p_lzt_fi = True
+    iter._p_go_lazy = go_lazy_fi
+    return iter
+L.find = __Lfind
+
+
+def __Lsome(iter):
+    iter._p_lze = iter._p_lzt_s = True
+    iter._p_go_lazy = go_lazy_s
+    return iter
+L.some = __Lsome
+
+
+def __Levery(iter):
+    iter._p_lze = iter._p_lzt_e = True
+    iter._p_go_lazy = go_lazy_e
+    return iter
+L.every = __Levery
+
+
+def __Ltake (limit):
+    def a(): pass
+    a._p_go_lazy = go_lazy_t
+    a._p_lze = a._p_lzt_t = True
+    a.limit = limit
+    return a
+L.take = __Ltake
 
 
 ___ = {}
