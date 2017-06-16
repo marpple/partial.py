@@ -248,9 +248,10 @@ _.go(users,
 # ["HA", "PJ", "JE"]
 
 ## Underscore.py 체인
-underscore.chain(users)
-  .filter(lambda u: u['age'] < 30)
-  .pluck('name')
+underscore\
+  .chain(users)\
+  .filter(lambda u: u['age'] < 30)\
+  .pluck('name')\
   .tap(print)
 # ["HA", "PJ", "JE"]
 ```
@@ -295,3 +296,64 @@ _.go(products,
   print)
   # 후드 집업
 ```
+
+## 비동기
+
+`async`, `await` 키워드와 Partial.py를 함께 사용하면 다양한 비동기 상황을 간단히 제어할 수 있습니다.
+
+### 파이프라인으로 비동기 제어 하기
+
+`_.asy`를 네임스페이스로 갖는 `_.asy.go`, `_.asy.pipe` 등의 파이프라인 함수들은 비동기 제어를 지원합니다.
+
+##### await 키워드와 함께 사용:
+
+```python
+async def asy_add(val, *r):
+  await asyncio.sleep(1)
+  return val + 10
+  
+## await 키워드를 사용해서 바로 실행하는 _.go.asy
+await _.asy.go(10,
+  asy_add,
+  print)
+  # 20
+  
+## _.asy.pipe로 비동기 함수와 동기 함수 조합해 만든 새로운 함수
+asy_pipe = _.asy.pipe(asy_add, print)
+await asy_pipe(10) 
+# 20
+
+## _.pipe는 비동기 함수를 만나면 자동으로 _.asy.pipe가 됩니다.
+asy_pipe = _.pipe(asy_add, print)
+await asy_pipe(10)
+# 20
+```
+
+### 컬렉션을 다루는 비동기 제어 함수
+
+Partial.py의 `_.each`, `_.map`, `_.reduce` 등의 주요 함수들은 `_.asy.go`와 `_.asy.pipe`처럼 동기와 비동기 상황이 모두 대응되도록 되어 있습니다. Partial.py의 함수를 이용하면 비동기 상황에서도 동기 상황과 동일한 코드를 작성할 수 있고, 비동기 함수와 동기 함수의 조합도 가능합니다.
+
+```python
+async def asyncDate(*r):
+  await asyncio.sleep(1)
+  return datetime.datetime.now()
+
+def syncDate(*r):
+  return datetime.datetime.now()
+
+_.go(
+  [1, 2, 3],
+  _.map(syncDate),
+  _.map(lambda now, *r: now.strftime('%Y-%m-%d %H:%M:%S')),
+  print)
+# ['2017-06-16 12:34:39', '2017-06-16 12:34:39', '2017-06-16 12:34:39']
+
+await _.asy.go(
+  [1, 2, 3],
+  _.map(asyncDate),
+  _.map(lambda now, *r: now.strftime('%Y-%m-%d %H:%M:%S')),
+  print)
+# ['2017-06-16 12:34:39', '2017-06-16 12:34:39', '2017-06-16 12:34:39']
+```
+
+위 사례처럼 Partial.py는 `_.pipe`, `_.each`, `_.map`, `_.find`, `_.filter`, `_.reject`, `_.reduce`, `_.some`, `_.every` 등의 함수들에서 자동 비동기 제어 로직을 지원합니다.
