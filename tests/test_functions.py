@@ -201,7 +201,6 @@ class TestStructure(unittest.TestCase):
         self.assertEqual(testAfter(0, 1), 1,
                          "after(0) should fire immediately")
 
-
     def test_partial(self):
         func = _.partial(lambda *args: args, _, 10, ___, _, 100, _, 300)
         self.assertEqual((0, 10, 20, 30, 40, 50, 60, 100, 200, 300),
