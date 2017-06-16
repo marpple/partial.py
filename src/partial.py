@@ -51,6 +51,7 @@ def __go(seed, *fns):
     seed = seed() if _.is_func(seed) else seed
     lazys = []
     for i, fn in enumerate(fns):
+
         if hasattr(fn, '_p_go_lazy'):
             lazys.append(fn)
             p_i = i+1
@@ -1269,11 +1270,23 @@ async def __asy_some(data, predicate=lambda x, *r: x):
 _.asy.some = __asy_some
 
 
+def __take (num):
+    def _take(seed):
+        return seed[0:num]
+    return _take
+_.take = __take
+
+
 def L(): pass
 
 
 def go_lazy(lazys, data):
     res = []
+    if hasattr(_.first(lazys), '_p_lzst'):
+        print(data)
+        if _.first(lazys)(data) :
+            return go_strict(lazys, data)
+    print('go lazy')
     for i, v in enumerate(data):
         memo = v
         breaked = False
@@ -1293,11 +1306,11 @@ def go_lazy(lazys, data):
 def go_lazy_t(lazys, data):
     res = []
     limit = _.last(lazys).limit
-    lazys.pop()
+
     for i, v in enumerate(data):
         memo = v
         breaked = False
-        for fn in lazys:
+        for fn in _.initial(lazys):
             evaled = fn(memo)
             if hasattr(fn, '_p_lzt_m'):
                 memo = evaled
@@ -1333,11 +1346,10 @@ def go_lazy_fi(lazys, data):
 
 def go_lazy_s(lazys, data):
     ender = _.last(lazys)
-    lazys.pop()
     for i, v in enumerate(data):
         memo = v
         breaked = False
-        for fn in lazys:
+        for fn in _.initial(lazys):
             evaled = fn(memo)
             if hasattr(fn, '_p_lzt_m'):
                 memo = evaled
@@ -1353,11 +1365,11 @@ def go_lazy_s(lazys, data):
 
 def go_lazy_e(lazys, data):
     ender = _.last(lazys)
-    lazys.pop()
+
     for i, v in enumerate(data):
         memo = v
         breaked = False
-        for fn in lazys:
+        for fn in _.initial(lazys):
             evaled = fn(memo)
             if hasattr(fn, '_p_lzt_m'):
                 memo = evaled
@@ -1370,16 +1382,32 @@ def go_lazy_e(lazys, data):
             return False
     return True
 
+def go_strict(lazys, data):
+    def _strict_li(l, *r):
+        if l._p_lzt_m:
+            return _.map(l)
+        if l._p_lzt_ft:
+            return _.filter(l)
+        if l._p_lzt_t:
+            return _.take(l.limit)
+        if l._p_lzt_fi:
+            return _.find(l)
+        if l._p_lzt_s:
+            return _.some(l)
+        if l._p_lzt_e:
+            return _.every(l)
+
+    return _.go(data, *_.map(_.rest(lazys), _strict_li))
 
 def __Lmap (iter):
-    iter._p_lzne = True
+    iter._p_lzne = iter._p_lzt_m = True
     iter._p_go_lazy = go_lazy
     return iter
 L.map = __Lmap
 
 
 def __Lfilter(iter):
-    iter._p_lzne = True
+    iter._p_lzne = iter._p_lzt_ft = True
     iter._p_go_lazy = go_lazy
     return iter
 L.filter = __Lfilter
@@ -1423,4 +1451,11 @@ def __Ltake (limit):
 L.take = __Ltake
 
 
+def __Lstrict (limit):
+    if _.is_num(limit):
+        return L.strict(lambda d: len(d) < limit)
+    limit._p_lzne = limit._p_lzst = True
+    limit._p_go_lazy = True
+    return limit
+L.strict = __Lstrict
 ___ = {}
