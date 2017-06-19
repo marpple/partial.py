@@ -238,14 +238,14 @@ _.go(users,
   lambda users: _.filter(users, lambda u, *r: u['age'] < 30),
   lambda users: _.pluck(users, 'name'),
   print)
-# ["HA", "PJ", "JE"]
+# ['HA', 'PJ', 'JE']
 
 ## 부분 커링이 된다면
 _.go(users,
   _.filter(lambda u, *r: u['age'] < 30),
   _.pluck('name'),
   print)
-# ["HA", "PJ", "JE"]
+# ['HA', 'PJ', 'JE']
 
 ## Underscore.py 체인
 underscore\
@@ -253,7 +253,7 @@ underscore\
   .filter(lambda u: u['age'] < 30)\
   .pluck('name')\
   .tap(print)
-# ["HA", "PJ", "JE"]
+# ['HA', 'PJ', 'JE']
 ```
 
 `_.go`, `_.pipe` 등의 파이프라인이 받는 재료는 함수이기 때문에 아무 함수나 조합할 수 있습니다. 체인처럼 메서드 등으로 준비되어있지 않아도 되며 Partial.py의 함수만 사용할 필요도 없습니다. Partial.py의 파이프라인은 결과를 여러 개로 리턴할 수 있고, 여러 개의 인자를 받을 수 있고, 다른 라이브러리에 있는 함수든, 직접 만든 함수든, 익명 함수든 모두 쉽게 사용할 수 있습니다.
@@ -272,7 +272,7 @@ _.go(products,
   _.sortBy('discounted_price'),
   _.pluck('name'),
   print)
-  # ["코잼 반팔티", "후드 집업"]
+  # ['코잼 반팔티', '후드 집업']
 
 # 할인이 없는 상품들의 id들
 _.go(products,
@@ -361,7 +361,7 @@ await _.asy.go(
 
 ## 지연 평가 L
 
-Partial.py의 `L`을 이용하면, 파이프라인 내부에서 함수들의 실행 순서를 재배치하여 적절하게 평가를 지연합니다. 사용법은 간단합니다. Partial.py에서 `L`을 `import`하시면 됩니다. `L`을 통해 지연 평가할 영역을 명시적으로 선택할 수 있습니다. `_.go, _.pipe`등의 파이프라인이 `L`로 시작하여 `L`로 끝날 때까지의 함수들을 재배치하여 성능을 개선합니다.
+Partial.py의 `L`을 이용하면, 파이프라인 내부에서 함수들의 실행 순서를 재배치하여 적절하게 평가를 지연합니다. 사용법은 간단합니다. Partial.py에서 `L`을 `import`하면 됩니다. `L`을 통해 지연 평가할 영역을 명시적으로 선택할 수 있습니다. `_.go, _.pipe`등의 파이프라인이 `L`로 시작하여 `L`로 끝날 때까지의 함수들을 재배치하여 성능을 개선합니다.
 
 ### 비교
 
@@ -369,8 +369,8 @@ Partial.py의 `L`을 이용하면, 파이프라인 내부에서 함수들의 실
 ```python
 list = [1, 2, 3, 4, 5, 6]
 _.go(list,
-  _.map(lambda v, *r: v * v), #6번
-  _.filter(lambda v, *r: v <20), #6번
+  _.map(lambda v, *r: v * v), # 6번
+  _.filter(lambda v, *r: v < 20), # 6번
   _.take(2),
   print)
 # [1, 4]
@@ -381,8 +381,8 @@ _.go(list,
 ```python
 list = [1, 2, 3, 4, 5, 6]
 _.go(list,
-  L.map(lambda v, *r: v * v), #2번
-  L.filter(lambda v, *r: v <20), #2번
+  L.map(lambda v, *r: v * v), # 2번
+  L.filter(lambda v, *r: v < 20), # 2번
   L.take(2),
   print)
 # [1, 4]
@@ -416,16 +416,16 @@ Partial.js의 지연 평가 지원 함수로는 `L.map`, `L.filter`, `L.reject`,
 
 ```python
 users = [
-  { 'id': 1, 'name': "ID", 'age': 12 },
-  { 'id': 2, 'name': "BJ", 'age': 28 },
-  { 'id': 3, 'name': "HA", 'age': 13 },
-  { 'id': 4, 'name': "PJ", 'age': 23 },
-  { 'id': 5, 'name': "JE", 'age': 29 },
-  { 'id': 6, 'name': "JM", 'age': 32 },
-  { 'id': 7, 'name': "JE", 'age': 31 },
-  { 'id': 8, 'name': "HI", 'age': 15 },
-  { 'id': 9, 'name': "HO", 'age': 28 },
-  { 'id': 10, 'name': "KO", 'age': 34 }
+  { 'id': 1, 'name': 'ID', 'age': 12 },
+  { 'id': 2, 'name': 'BJ', 'age': 28 },
+  { 'id': 3, 'name': 'HA', 'age': 13 },
+  { 'id': 4, 'name': 'PJ', 'age': 23 },
+  { 'id': 5, 'name': 'JE', 'age': 29 },
+  { 'id': 6, 'name': 'JM', 'age': 32 },
+  { 'id': 7, 'name': 'JE', 'age': 31 },
+  { 'id': 8, 'name': 'HI', 'age': 15 },
+  { 'id': 9, 'name': 'HO', 'age': 28 },
+  { 'id': 10, 'name': 'KO', 'age': 34 }
 ]
 
 # 10대 2명까지만 찾아내기
@@ -433,7 +433,7 @@ _.go(users,
   L.filter(lambda user, *r : user['age'] < 20),
   L.take(2),
   print)
-# [{ 'id': 1, 'name': "ID", 'age': 12 }, { 'id': 3, 'name': "HA", 'age': 13 }]
+# [{ 'id': 1, 'name': 'ID', 'age': 12 }, { 'id': 3, 'name': 'HA', 'age': 13 }]
 # 3번만 반복
 
 # 10대 2명까지만 찾아내서 이름 수집하기
@@ -442,7 +442,7 @@ _.go(users,
   L.map(lambda v, *r : v['name']),
   L.take(2),
   print)
-# ["ID", "HA"]
+# ['ID', 'HA']
 # 3번만 반복
 ```
 
@@ -464,11 +464,11 @@ strict_or_lazy1(50)
 # [1, 9, 25, 49, 81, 121, 169, 225, 289, 361]
 # 50 번 반복 (염격)
 
-strict_or_lazy1(100);
+strict_or_lazy1(100)
 # [1, 9, 25, 49, 81, 121, 169, 225, 289, 361]
 # 20 번 반복 (지연)
 
-strict_or_lazy1(15);
+strict_or_lazy1(15)
 # [1, 9, 25, 49, 81, 121, 169]
 # 15 번 반복 (엄격)
 ```
@@ -491,7 +491,7 @@ strict_or_lazy2(100)
 # [1, 9, 25, 49, 81, 121, 169, 225, 289, 361]
 # 20 번 반복 (지연)
 
-strict_or_lazy2(15);
+strict_or_lazy2(15)
 # [1, 9, 25, 49, 81, 121, 169]
 # 15 번 반복 (엄격)
 ```
