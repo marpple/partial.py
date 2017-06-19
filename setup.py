@@ -1,4 +1,5 @@
 from setuptools import setup
+from src.partial import __version__
 
 
 with open('README.rst') as rm:
@@ -7,7 +8,7 @@ with open('README.rst') as rm:
 
 setup_kwargs = {
       'name': 'partial.py',
-      'version': '0.1.2',
+      'version': __version__,
       'description': 'Functional Python Library',
       'long_description': long_description,
       'url': 'https://github.com/marpple/partial.py',
