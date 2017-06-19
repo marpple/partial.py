@@ -357,3 +357,141 @@ await _.asy.go(
 ```
 
 위 사례처럼 Partial.py는 `_.pipe`, `_.each`, `_.map`, `_.find`, `_.filter`, `_.reject`, `_.reduce`, `_.some`, `_.every` 등의 함수들에서 자동 비동기 제어 로직을 지원합니다.
+
+
+## 지연 평가 L
+
+Partial.py의 `L`을 이용하면, 파이프라인 내부에서 함수들의 실행 순서를 재배치하여 적절하게 평가를 지연합니다. 사용법은 간단합니다. Partial.py에서 `L`을 `import`하시면 됩니다. `L`을 통해 지연 평가할 영역을 명시적으로 선택할 수 있습니다. `_.go, _.pipe`등의 파이프라인이 `L`로 시작하여 `L`로 끝날 때까지의 함수들을 재배치하여 성능을 개선합니다.
+
+### 비교
+
+##### 엄격한 평가:
+```python
+list = [1, 2, 3, 4, 5, 6]
+_.go(list,
+  _.map(lambda v, *r: v * v), #6번
+  _.filter(lambda v, *r: v <20), #6번
+  _.take(2),
+  print)
+# [1, 4]
+# 총 12번
+```
+
+##### 지연 평가:
+```python
+list = [1, 2, 3, 4, 5, 6]
+_.go(list,
+  L.map(lambda v, *r: v * v), #2번
+  L.filter(lambda v, *r: v <20), #2번
+  L.take(2),
+  print)
+# [1, 4]
+# 총 4번  
+```
+
+### 지원 함수들
+
+Partial.js의 지연 평가 지원 함수로는 `L.map`, `L.filter`, `L.reject`, `L.find`, `L.some`, `L.every`, `L.take`가 있습니다. 이 함수들을 순서대로 나열하면 파이프라인이 평가 시점을 변경하여 성능을 개선합니다.
+
+다음과 같은 상황 등에서 동작합니다.
+
+- map->map->map
+- map->take
+- filter->take
+- map->filter->take
+- map->filter->map->map
+- map->filter->map->take
+- map->reject->map->map->filter->map
+- map->some
+- map->every
+- map->find
+- map->filter->some
+- map->filter->every
+- map->filter->find
+- filter->map->some
+- filter->map->every
+- filter->map->reject->find
+
+지연 평가를 시작시키고 유지 시키는 함수는 `map`, `filter`, `reject`이고 끝을 내는 함수는 `take`, `some`, `every`, `find`, 입니다.
+
+```python
+users = [
+  { 'id': 1, 'name': "ID", 'age': 12 },
+  { 'id': 2, 'name': "BJ", 'age': 28 },
+  { 'id': 3, 'name': "HA", 'age': 13 },
+  { 'id': 4, 'name': "PJ", 'age': 23 },
+  { 'id': 5, 'name': "JE", 'age': 29 },
+  { 'id': 6, 'name': "JM", 'age': 32 },
+  { 'id': 7, 'name': "JE", 'age': 31 },
+  { 'id': 8, 'name': "HI", 'age': 15 },
+  { 'id': 9, 'name': "HO", 'age': 28 },
+  { 'id': 10, 'name': "KO", 'age': 34 }
+]
+
+# 10대 2명까지만 찾아내기
+_.go(users,
+  L.filter(lambda user, *r : user['age'] < 20),
+  L.take(2),
+  print)
+# [{ 'id': 1, 'name': "ID", 'age': 12 }, { 'id': 3, 'name': "HA", 'age': 13 }]
+# 3번만 반복
+
+# 10대 2명까지만 찾아내서 이름 수집하기
+_.go(users,
+  L.filter(lambda user, *r : user['age'] < 20),
+  L.map(lambda v, *r : v['name']),
+  L.take(2),
+  print)
+# ["ID", "HA"]
+# 3번만 반복
+```
+
+### L.strict
+
+`L.strict`를 이용하여 지연 평가를 동작시킬 것인가를 동적으로 변경할 수 있습니다.
+
+##### 숫자로 하기:
+```python
+strict_or_lazy1 = __(
+  _.range,
+  L.strict(100),
+  L.map(lambda v, *r: v * v),
+  L.filter(lambda v, *r: _.bool(v % 2)),
+  L.take(10),
+  print)
+
+strict_or_lazy1(50)
+# [1, 9, 25, 49, 81, 121, 169, 225, 289, 361]
+# 50 번 반복 (염격)
+
+strict_or_lazy1(100);
+# [1, 9, 25, 49, 81, 121, 169, 225, 289, 361]
+# 20 번 반복 (지연)
+
+strict_or_lazy1(15);
+# [1, 9, 25, 49, 81, 121, 169]
+# 15 번 반복 (엄격)
+```
+
+##### 함수로 하기:
+```python
+strict_or_lazy2 = __(
+  _.range,
+  L.strict(lambda list, *r : len(list) < 100),
+  L.map(lambda v, *r : v * v),
+  L.filter(lambda v, *r : bool(v % 2)),
+  L.take(10),
+  print)
+
+strict_or_lazy2(50)
+# [1, 9, 25, 49, 81, 121, 169, 225, 289, 361]
+# 50 번 반복 (염격)
+
+strict_or_lazy2(100)
+# [1, 9, 25, 49, 81, 121, 169, 225, 289, 361]
+# 20 번 반복 (지연)
+
+strict_or_lazy2(15);
+# [1, 9, 25, 49, 81, 121, 169]
+# 15 번 반복 (엄격)
+```

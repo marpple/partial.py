@@ -1292,6 +1292,10 @@ def L(): pass
 
 def go_lazy(lazys, data):
     res = []
+    if hasattr(lazys[0], '_p_lzst'):
+        if lazys[0](data):
+            return go_strict(lazys, data)
+        lazys = lazys[1:]
     for i, v in enumerate(data):
         memo, breaked = (v, False)
         for fn in lazys:
@@ -1308,7 +1312,11 @@ def go_lazy(lazys, data):
 
 
 def go_lazy_t(lazys, data):
-    res, limit = ([], lazys.pop().limit)
+    res, limit = ([], lazys[-1].limit)
+    if hasattr(lazys[0], '_p_lzst'):
+        if lazys[0](data):
+            return go_strict(lazys, data)
+        lazys = lazys[1:-1]
     for i, v in enumerate(data):
         memo, breaked = (v, False)
         for fn in lazys:
@@ -1328,6 +1336,10 @@ def go_lazy_t(lazys, data):
 
 def go_lazy_fi(lazys, data):
     ender = lazys[-1]
+    if hasattr(lazys[0], '_p_lzst'):
+        if lazys[0](data):
+            return go_strict(lazys, data)
+        lazys = lazys[1:]
     for i, v in enumerate(data):
         memo, breaked = (v, False)
         for fn in lazys:
@@ -1345,6 +1357,10 @@ def go_lazy_fi(lazys, data):
 
 def go_lazy_s(lazys, data):
     ender = lazys.pop()
+    if hasattr(lazys[0], '_p_lzst'):
+        if lazys[0](data):
+            return go_strict(lazys, data)
+        lazys = lazys[1:]
     for i, v in enumerate(data):
         memo, breaked = (v, False)
         for fn in lazys:
@@ -1363,6 +1379,10 @@ def go_lazy_s(lazys, data):
 
 def go_lazy_e(lazys, data):
     ender = lazys.pop()
+    if hasattr(lazys[0], '_p_lzst'):
+        if lazys[0](data):
+            return go_strict(lazys, data)
+        lazys = lazys[1:]
     for i, v in enumerate(data):
         memo, breaked = (v, False)
         for fn in lazys:
@@ -1379,15 +1399,33 @@ def go_lazy_e(lazys, data):
     return True
 
 
+def go_strict(lazys, data):
+    def _strict_li(l, *r):
+        if hasattr(l, '_p_lzt_m'):
+            return _.map(l)
+        if hasattr(l, '_p_lzt_ft'):
+            return _.filter(l)
+        if hasattr(l, '_p_lzt_t'):
+            return _.take(l.limit)
+        if hasattr(l, '_p_lzt_fi'):
+            return _.find(l)
+        if hasattr(l, '_p_lzt_s'):
+            return _.some(l)
+        if hasattr(l, '_p_lzt_e'):
+            return _.every(l)
+
+    return _.go(data, *_.map(_.rest(lazys), _strict_li))
+
+
 def __Lmap(iter):
-    iter._p_lzne = True
+    iter._p_lzne = iter._p_lzt_m = True
     iter._p_go_lazy = go_lazy
     return iter
 L.map = __Lmap
 
 
 def __Lfilter(iter):
-    iter._p_lzne = True
+    iter._p_lzne = iter._p_lzt_ft = True
     iter._p_go_lazy = go_lazy
     return iter
 L.filter = __Lfilter
@@ -1431,5 +1469,12 @@ def __Ltake(limit):
 L.take = __Ltake
 
 
+def __Lstrict(limit):
+    if _.is_num(limit):
+        return L.strict(lambda d: len(d) < limit)
+    limit._p_lzne = limit._p_lzst = True
+    limit._p_go_lazy = True
+    return limit
+L.strict = __Lstrict
 ___ = {}
 __version__ = '0.1.3'
