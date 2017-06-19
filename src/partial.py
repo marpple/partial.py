@@ -1319,7 +1319,7 @@ def go_lazy_t(lazys, data):
         lazys = lazys[1:-1]
     for i, v in enumerate(data):
         memo, breaked = (v, False)
-        for fn in lazys:
+        for fn in lazys[:-1]:
             evaled = fn(memo)
             if hasattr(fn, '_p_lzt_m'):
                 memo = evaled
