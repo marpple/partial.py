@@ -1,4 +1,4 @@
-# Partial.py 0.1.3
+# Partial.py 0.1.4
 # Project Lead - Indong Yoo
 # Maintainers - Jeongik Park, Joeun Ha
 # (c) 2017 Marpple. MIT Licensed.
