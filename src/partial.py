@@ -1477,4 +1477,3 @@ def __Lstrict(limit):
     return limit
 L.strict = __Lstrict
 ___ = {}
-__version__ = '0.1.3'
