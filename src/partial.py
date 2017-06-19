@@ -1317,6 +1317,8 @@ def go_lazy_t(lazys, data):
         if lazys[0](data):
             return go_strict(lazys, data)
         lazys = lazys[1:-1]
+    else:
+        lazys = lazys[:-1]
     for i, v in enumerate(data):
         memo, breaked = (v, False)
         for fn in lazys:
