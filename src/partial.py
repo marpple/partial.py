@@ -1317,9 +1317,11 @@ def go_lazy_t(lazys, data):
         if lazys[0](data):
             return go_strict(lazys, data)
         lazys = lazys[1:-1]
+    else:
+        lazys = lazys[:-1]
     for i, v in enumerate(data):
         memo, breaked = (v, False)
-        for fn in lazys[:-1]:
+        for fn in lazys:
             evaled = fn(memo)
             if hasattr(fn, '_p_lzt_m'):
                 memo = evaled
