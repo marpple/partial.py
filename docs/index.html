@@ -11,7 +11,7 @@
 <meta property="og:url" content="https://marpple.github.io/partial.py/docs/index.html">
 <meta property="og:site_name" content="Partial.py">
 <meta property="og:description" content="Partial_.partial_.partial을 통해 인자를 부분 적용해둔 함수를 만들 수 있습니다.123456def add(a, b):  return a + badd10 = _.partial(add, 10)result = add10(5)print(result) # 15 __ == _.partial입니다. _.partial을 _로 짧게 줄여서 사용할 수 있">
-<meta property="og:updated_time" content="2017-06-16T06:00:23.000Z">
+<meta property="og:updated_time" content="2017-06-26T11:48:21.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Partial.py Documents Page">
 <meta name="twitter:description" content="Partial_.partial_.partial을 통해 인자를 부분 적용해둔 함수를 만들 수 있습니다.123456def add(a, b):  return a + badd10 = _.partial(add, 10)result = add10(5)print(result) # 15 __ == _.partial입니다. _.partial을 _로 짧게 줄여서 사용할 수 있">
@@ -63,7 +63,7 @@
   <div class="widget-wrap" id="docs">
     
     <div class="widget-title">
-      <a href="#partial">partial</a>
+      <a href="#Partial">Partial</a>
     </div>
     <div class="widget">
       <ul>
@@ -73,14 +73,18 @@
         </li>
         
         <li>
-          <a href="#">_</a>
+          <a href="#_">_</a>
+        </li>
+        
+        <li>
+          <a href="#___">___</a>
         </li>
         
       </ul>
     </div>
     
     <div class="widget-title">
-      <a href="#pipe">pipe</a>
+      <a href="#Pipe">Pipe</a>
     </div>
     <div class="widget">
       <ul>
@@ -105,7 +109,7 @@
     </div>
     
     <div class="widget-title">
-      <a href="#collections">collections</a>
+      <a href="#Collections">Collections</a>
     </div>
     <div class="widget">
       <ul>
@@ -210,7 +214,7 @@
     </div>
     
     <div class="widget-title">
-      <a href="#array">array</a>
+      <a href="#Array">Array</a>
     </div>
     <div class="widget">
       <ul>
@@ -299,7 +303,7 @@
     </div>
     
     <div class="widget-title">
-      <a href="#object">object</a>
+      <a href="#Object">Object</a>
     </div>
     <div class="widget">
       <ul>
@@ -460,7 +464,7 @@
 <figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">sum</span><span class="params">(a, b)</span>:</span></div><div class="line">  <span class="keyword">return</span> a + b</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">square</span><span class="params">(a)</span>:</span></div><div class="line">  <span class="keyword">return</span> a * a</div><div class="line"></div><div class="line">f1 = _.pipe(sum, square, square)</div><div class="line">result = f1(<span class="number">1</span>, <span class="number">2</span>)</div><div class="line">print(result)</div><div class="line"><span class="comment"># 81</span></div></pre></td></tr></table></figure>
 <h3 id="go"><a href="#go" class="headerlink" title="_.go"></a>_.go</h3><p><code>_.go</code>는 파이프라인의 즉시 실행 버전입니다. 첫 번째 인자로 받은 값을 두 번째 인자로 받은 함수에게 넘겨주고 두 번째 인자로 받은 함수의 결과는 세 번째 함수에게 넘겨주는 것을 반복하다가 마지막 함수의 결과를 리턴해줍니다.</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">_.go(<span class="number">10</span>, <span class="comment"># 첫 번째 함수에서 사용할 인자</span></div><div class="line">  <span class="keyword">lambda</span> a: a * <span class="number">10</span>, <span class="comment"># 연속 실행할 함수 1</span></div><div class="line">  <span class="comment"># 100</span></div><div class="line">  <span class="keyword">lambda</span> a: a - <span class="number">50</span>, <span class="comment"># 연속 실행할 함수 2</span></div><div class="line">  <span class="comment"># 50</span></div><div class="line">  <span class="keyword">lambda</span> a: a + <span class="number">10</span>) <span class="comment"># 연속 실행할 함수 3</span></div><div class="line">  <span class="comment"># 60</span></div></pre></td></tr></table></figure>
-<h3 id="mr"><a href="#mr" class="headerlink" title="_.mr"></a>_.mr</h3><p>Partial.js의 파이프라인 함수들은 Multiple Results를 지원합니다. <code>_.mr</code> 함수를 함께 사용하면 다음 함수에게 2개 이상의 인자들을 전달할 수 있습니다.</p>
+<h3 id="mr"><a href="#mr" class="headerlink" title="_.mr"></a>_.mr</h3><p>Partial.py의 파이프라인 함수들은 Multiple Results를 지원합니다. <code>_.mr</code> 함수를 함께 사용하면 다음 함수에게 2개 이상의 인자들을 전달할 수 있습니다.</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">_.go(<span class="number">10</span>, <span class="comment"># 첫 번째 함수에서 사용할 인자</span></div><div class="line">  <span class="keyword">lambda</span> a: _.mr(a * <span class="number">10</span>, <span class="number">50</span>), <span class="comment"># 두 개의 값을 리턴</span></div><div class="line">  <span class="keyword">lambda</span> a, b: a - b, <span class="comment"># 두 개의 인자 받기</span></div><div class="line">  <span class="keyword">lambda</span> a: a + <span class="number">10</span>,</div><div class="line">  <span class="keyword">print</span>)</div><div class="line">  <span class="comment"># 60</span></div><div class="line"></div><div class="line">_.go(_.mr(<span class="number">2</span>, <span class="number">3</span>),</div><div class="line">  <span class="keyword">lambda</span> a, b: a + b, <span class="comment"># 2 + 3</span></div><div class="line">  <span class="keyword">lambda</span> a: a * a,</div><div class="line">  <span class="keyword">print</span>)</div><div class="line">  <span class="comment"># 25</span></div></pre></td></tr></table></figure>
 <h3 id="tap"><a href="#tap" class="headerlink" title="_.tap"></a>_.tap</h3><p><code>_.tap</code>은 받아둔 함수들을 모두 실행한 후 처음 받은 인자를 동일하게 리턴하는 파이프라인 함수입니다.</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">_.go(<span class="number">10</span>,</div><div class="line">  _.tap(</div><div class="line">    <span class="keyword">lambda</span> a: a * a,</div><div class="line">    <span class="keyword">print</span>), <span class="comment"># 100</span></div><div class="line">  <span class="keyword">print</span>) <span class="comment"># 10</span></div></pre></td></tr></table></figure>
@@ -546,7 +550,7 @@
 <figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">someFunc</span><span class="params">()</span>:</span></div><div class="line">  print(datetime.datetime.now())</div><div class="line"></div><div class="line">throttled = _.throttle(someFunc, <span class="number">0.1</span>)</div><div class="line">Timer(<span class="number">0.07</span>, throttled).start()</div><div class="line">Timer(<span class="number">0.12</span>, throttled).start()</div><div class="line">Timer(<span class="number">0.14</span>, throttled).start()</div><div class="line">Timer(<span class="number">0.19</span>, throttled).start()</div><div class="line">Timer(<span class="number">0.22</span>, throttled).start()</div><div class="line">Timer(<span class="number">0.34</span>, throttled).start()</div><div class="line"></div><div class="line"><span class="comment"># 스크롤 할 때, someFunc는 시작할때 한 번 실행된 후 0.1초후에 실행됩니다. 이어서 함수가 실행된다면 0.1초의 간격을 두고 실행됩니다.</span></div></pre></td></tr></table></figure>
 <h3 id="debounce"><a href="#debounce" class="headerlink" title="_.debounce"></a>_.debounce</h3><p><code>_.debounce(function, wait, [immediate])</code> <code>_.debounce</code>는 함수를 받아 새로운 함수 <code>debounced</code>를 리턴합니다. (1)<code>debounced</code>를 실행하면 지정된 시간이 지난 후 받아둔 함수를 실행합니다. 만일 지정된 시간 전에 <code>debounced</code>가 다시 실행되면 함수 실행은 다시 지정된 시간 이후로 미뤄집니다. <code>[immediate]</code>에 <code>True</code>를 넘기면 <code>debounced</code>의 첫 번째 실행은 무조건 실행하고, 이 후 실행부터 (1)이 반복됩니다.</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">debounced = _.debounce(someFunc, <span class="number">0.1</span>)</div><div class="line">Timer(<span class="number">0.07</span>, debounced).start()</div><div class="line">Timer(<span class="number">0.12</span>, debounced).start()</div><div class="line">Timer(<span class="number">0.14</span>, debounced).start()</div><div class="line">Timer(<span class="number">0.19</span>, debounced).start()</div><div class="line">Timer(<span class="number">0.22</span>, debounced).start()</div><div class="line">Timer(<span class="number">0.34</span>, debounced).start()</div><div class="line"></div><div class="line"><span class="comment"># 스크롤이 끝나고 나서 0.1초 후에 someFunc가 실행됩니다. 0.1초가 지나기 전에 다시 함수가 실행된다면, 다시 0.1초가 지나야 someFunc가 호출 됩니다.</span></div></pre></td></tr></table></figure>
-<h2 id="Laziness"><a href="#Laziness" class="headerlink" title="Laziness"></a>Laziness</h2><p>Partial.js의 <code>L</code>을 이용하면, 파이프라인 내부에서 함수들의 실행 순서를 재배치하여 적절하게 평가를 지연합니다.</p>
+<h2 id="Laziness"><a href="#Laziness" class="headerlink" title="Laziness"></a>Laziness</h2><p>Partial.py의 <code>L</code>을 이용하면, 파이프라인 내부에서 함수들의 실행 순서를 재배치하여 적절하게 평가를 지연합니다.</p>
 <ul>
 <li><a href="/partial.py/#지연-평가-L">예제와 설명 보기</a></li>
 </ul>
