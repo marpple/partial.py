@@ -23,7 +23,6 @@
   _.go($(document),
     _('on', 'keydown', function(e) {
       var keyCode = e.keyCode || e.which;
-      console.log("=======", tags, tags[idx], idx, keyCode)
       if (window.location.hash) idx = _.index_of(tags, window.location.hash);
       if (keyCode == 74) { return move_href(tags[idx < len ? ++idx : len]) }
       if (keyCode == 75) { return move_href(tags[idx > 0 ? --idx : 0]) }
@@ -164,7 +163,7 @@
     setTimeout(function(){
       isMobileNavAnim = false;
     }, mobileNavAnimDuration);
-  }
+  };
 
   $('#main-nav-toggle').on('click', function(){
     if (isMobileNavAnim) return;
